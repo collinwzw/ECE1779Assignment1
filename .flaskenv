@@ -1,1 +1,2 @@
 FLASK_APP=faceDetection.py
+FLASK_DEBUG=1

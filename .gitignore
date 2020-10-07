@@ -1,2 +1,5 @@
 __pycache__
 app/__pycache__
+.idea/.name
+.idea/workspace.xml
+.DS_Store

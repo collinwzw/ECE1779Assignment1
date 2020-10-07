@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Face Mask Detection App</title>
+    <style>
+        body {
+            background-image:url("./bg.jpg");
+            background-size:cover;
+            background-attachment:fixed;
+            background-repeat:no repeat;
+        }
+        .title {
+            margin: auto;
+            position: absolute;
+            top: 90;
+            left: 0;
+            right: 0;
+            width: 500px;
+            text-align: center;
+            color: white;
+        }
+
+        .form {
+            margin: auto;
+            position: absolute;
+            left: 0;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(26, 26, 26, 0.1);
+            width: 400px;
+            padding: 0 20px 0 20px;
+            border-radius: 3px;
+        }
+
+
+    </style>
+
+</head>
+<body>
+<div class="title">
+        <h1>Face Mask Detection App</h1>
+        </div>
+
+<div class="form">
+        <form action="/register" method="post" id="registerForm" style="display: none;">
+
+            <div class="container">
+                <label for="password"><b>Username</b></label>
+                <input type="text" placeholder="Enter Username" name="username" required>
+
+                <label for="password"><b>Password</b></label>
+                <input type="password" placeholder="Enter Password" name="password" required>
+
+                <label for="password"><b>Repeat Password</b></label>
+                <input type="password" placeholder="Enter Password Again" name="repet_password" required>
+
+                <button type="submit">注册</button>
+            </div>
+
+        </form>
+
+
+ </div>
+
+</body>
+</html>

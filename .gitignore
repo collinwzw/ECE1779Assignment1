@@ -3,3 +3,8 @@ app/__pycache__
 .idea/.name
 .idea/workspace.xml
 .DS_Store
+.idea/misc.xml
+.idea/vcs.xml
+.idea/modules.xml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/ECE1779Assignment1.iml

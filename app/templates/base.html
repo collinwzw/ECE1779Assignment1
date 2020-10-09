@@ -1,8 +1,24 @@
 <html>
     
     <head>
-		<li><a href="{{url_for('index')}}">Home</a></li>
+
+        <li><a href="{{url_for('index')}}">Home</a></li>
         <li><a href="{{url_for('login')}}">Login</a></li>
+        <style>
+        body {
+            background-image:url('bg.jpg');
+            background-repeat:no-repeat;
+            background-attachment:fixed;
+            background-size: cover;
+        }
+        li {
+            display: inline;
+            font-size: 30px;
+            padding: 0 9px;
+            color: rgb(255,0,0);
+            border-radius: 6px;
+        }
+        </style>
     </head>
     {% block content %}{% endblock %}
 </html>

@@ -6,3 +6,9 @@ app = Flask(__name__) #The __name__ variable passed to the Flask class is a Pyth
 app.secret_key = 'ece1779a1'
 
 from app import main
+
+from app import image
+
+from app import login
+
+from app import config

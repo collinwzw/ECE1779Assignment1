@@ -1,5 +1,6 @@
 from app import app
 from flask import render_template, g, request, session, redirect, url_for
+
 import mysql.connector
 from app.config import db_config
 

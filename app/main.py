@@ -3,11 +3,13 @@ from flask import render_template, g, request, session, redirect, url_for
 import mysql.connector
 from app.config import db_config
 
+
 def connect_to_database():
     return mysql.connector.connect(user=db_config['user'],
                                    password=db_config['password'],
                                    host=db_config['host'],
                                    database=db_config['database'])
+
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -20,6 +22,15 @@ def teardown_db(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
+
+
+add_employee = ("INSERT INTO employees "
+               "(first_name, last_name, hire_date, gender, birth_date) "
+               "VALUES (%s, %s, %s, %s, %s)")
+add_salary = ("INSERT INTO salaries "
+              "(emp_no, salary, from_date, to_date) "
+              "VALUES (%(emp_no)s, %(salary)s, %(from_date)s, %(to_date)s)")
+
 
 
 @app.route('/') 

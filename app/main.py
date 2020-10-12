@@ -2,6 +2,7 @@ from app import app
 from flask import render_template, g, request, session, redirect, url_for
 import mysql.connector
 from app.config import db_config
+import image
 
 def connect_to_database():
     return mysql.connector.connect(user=db_config['user'],
@@ -114,16 +115,3 @@ def home():
     return redirect(url_for('login'))
 
 
-@app.route('/profile')
-def profile():
-    # Check if user is loggedin
-    if 'loggedin' in session:
-        # We need all the account info for the user so we can display it on the profile page
-        db = get_db()
-        cursor = db.cursor(dictionary=True)
-        cursor.execute('SELECT * FROM accounts WHERE id = %s', (session['id'],))
-        account = cursor.fetchone()
-        # Show the profile page with account info
-        return render_template('profile.html', account=account)
-    # User is not loggedin redirect to login page
-    return redirect(url_for('login'))

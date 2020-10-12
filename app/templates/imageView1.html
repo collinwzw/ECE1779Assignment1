@@ -1,0 +1,15 @@
+<html>
+
+    <head>
+		<li><a href="{{url_for('index')}}">Home</a></li>
+        <li><a href="{{url_for('login')}}">Login</a></li>
+    </head>
+
+<body>
+<hr>
+    {% for image in images %}
+                   <td> <img src="{{url_for('static', filename=image) }}">
+<!--        <img src="{{ image }}" alt="User Image">-->
+    {% endfor %}
+</body>
+</html>

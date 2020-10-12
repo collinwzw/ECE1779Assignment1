@@ -1,0 +1,21 @@
+
+{% extends 'layout.html' %}
+
+{% block title %}ImageList{% endblock %}
+
+{% block content %}
+
+    <form action='{{url_for("imageUpload")}}' method='post'>
+        <input type='submit' value='Upload' />
+    </form>
+{{images}}
+<hr>
+   <table>
+    {% for image in images %}
+        <img src="{{url_for('sendImages', filename=image)}}" width = "400" height = "200" alt=image>
+       <hr>
+<!--        <img src="{{ image }}" alt="User Image">-->
+    {% endfor %}
+    </table>
+
+{% endblock %}

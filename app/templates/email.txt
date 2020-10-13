@@ -1,0 +1,10 @@
+Dear {{ user.username }},
+
+Please receive your new password click on the following link:
+
+{{ newpsw }}
+
+You need to change it as soon as possible.
+
+
+Keep Safe and healthy!

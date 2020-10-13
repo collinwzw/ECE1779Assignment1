@@ -88,7 +88,6 @@ def inference(image,
             cv2.putText(image, "%s: %.2f" % (id2class[class_id], conf), (xmin + 2, ymin - 2),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, color)
         output_info.append([class_id, conf, xmin, ymin, xmax, ymax])
-
     if show_result:
         Image.fromarray(image).show()
     return output_info, image

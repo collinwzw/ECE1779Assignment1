@@ -15,7 +15,13 @@ app.config["IMAGE_PROCESSED"]="C:/Users/ASUS/python-workspace/ECE1779Assignment1
 app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG"]
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
-
+def getNumberOfFilesInDatabase():
+    db = get_db()
+    cursor = db.cursor()
+    query = '''select count(*) from images'''
+    cursor.execute(query)
+    numberOfFiles = cursor.fetchall()
+    return numberOfFiles[0][0]
 #method to check the type of file uploaded by user
 def allowed_image(filename):
     if not "." in filename:
@@ -24,7 +30,7 @@ def allowed_image(filename):
     if ext.upper() in app.config["ALLOWED_IMAGE_EXETENSIONS"]:
         return True
 
-@app.route('/sendImages',methods = ["GET", "POST"])
+@app.route('/sendImages/<filename>',methods = ["GET", "POST"])
 def sendImages(filename):
     #print(filename)
     image_path = os.path.join(app.config["IMAGE_PROCESSED"], filename)
@@ -36,16 +42,15 @@ def imageView():
     # Check if user is loggedin
     if 'loggedin' in session:
         # We need all the account info for the user so we can display it on the profile page
-        #db = get_db()
-        #cursor = db.cursor(dictionary=True)
-        #cursor.execute('SELECT * FROM accounts WHERE id = %s', (session['id'],))
-        imageNames = os.listdir(app.config["IMAGE_PROCESSED"])
-        # fullFileName = []
-        # for imagename in imageNames:
-        #     fullFileName.append(os.path.join(app.config['IMAGE_UPLOADS'], imagename))
-        #     print(fullFileName)
 
-        return render_template('imageView.html', images = imageNames)
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        query = '''SELECT * FROM images WHERE username = %s'''
+        cursor.execute(query, (session['username'],))
+
+        images = cursor.fetchall()
+
+        return render_template('imageView.html', images = images)
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
@@ -67,15 +72,33 @@ def imageUpload():
             else:
                 filename = secure_filename(image.filename)
                 savePath = os.path.join(app.config["IMAGE_UPLOADS"], image.filename)
-                processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], image.filename)
                 image.save(savePath)
-                faceMaskDetection(savePath,processedSavePath)
+                output_info,processedImage = faceMaskDetection(savePath)
+                numberofFaces = len(output_info)
+                numberofMasks = NumberOfMask(output_info)
+                numberOfFileInDatabase = getNumberOfFilesInDatabase()
+                finafilename = 'processed' + str(numberOfFileInDatabase) + '.' + filename.rsplit(".", 1)[1]
+                db = get_db()
+                cursor = db.cursor(dictionary=True)
+                query ='''insert into images values (%s,%s,%s,%s)'''
+                cursor.execute(query, (session['username'],finafilename, numberofFaces,numberofMasks, ))
+                db.commit()
+                processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
+                cv2.imwrite(processedSavePath, processedImage)
             return redirect("imageView")
     return render_template("imageUpload.html")
 
-def faceMaskDetection(readFilePath, saveFilePath):
+def faceMaskDetection(readFilePath):
     img = cv2.imread(readFilePath)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     output_info, image = inference(img, show_result=False, target_shape=(360, 360))
-    print(output_info)
-    cv2.imwrite(saveFilePath, image)
+
+    #cv2.imwrite(saveFilePath, image)
+    return output_info,image
+
+def NumberOfMask(outputList):
+    result = 0
+    for outputInfor in outputList:
+        if outputInfor[0] == 0:
+            result = result + 1
+    return result

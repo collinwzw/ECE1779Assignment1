@@ -2,7 +2,7 @@ from app import app
 from flask import render_template, g, request, session, redirect, url_for
 import mysql.connector
 from app.config import db_config
-import image
+import re
 
 def connect_to_database():
     return mysql.connector.connect(user=db_config['user'],
@@ -83,8 +83,9 @@ def register():
         email = request.form['email']
         cnx = get_db()
         cursor = cnx.cursor()
-        query = "SELECT * FROM accounts WHERE username = %s "
-        cursor.execute(query,(username))
+        query = '''SELECT * FROM accounts WHERE username = %s '''
+        cursor.execute(query,(username, ))
+        account = cursor.fetchone()
         if account:
             msg = 'Account already exists!'
         elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
@@ -96,7 +97,7 @@ def register():
         else:
             # Account doesnt exists and the form data is valid, now insert new account into accounts table
             cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s)', (username, password, email,))
-            mysql.connection.commit()
+            cnx.commit()
             msg = 'You have successfully registered!'
     elif request.method == 'POST':
         # Form is empty... (no POST data)

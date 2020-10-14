@@ -4,6 +4,8 @@ from app.main import get_db
 import cv2
 import os, sys
 from werkzeug.utils import secure_filename
+import requests
+import shutil
 sys.path.insert(1, 'C:/Users/ASUS/python-workspace/ECE1779Assignment1/FaceMaskDetection')
 sys.path.insert(1, 'C:/Users/ASUS/python-workspace/ECE1779Assignment1/FaceMaskDetection/models')
 sys.path.insert(1, 'C:/Users/ASUS/python-workspace/ECE1779Assignment1/FaceMaskDetection/load_model')
@@ -45,9 +47,13 @@ def imageView():
 
         db = get_db()
         cursor = db.cursor(dictionary=True)
-        query = '''SELECT * FROM images WHERE username = %s'''
-        cursor.execute(query, (session['username'],))
-
+        try:
+            db.start_transaction()
+            query = '''SELECT * FROM images WHERE username = %s for update'''
+            cursor.execute(query, (session['username'],))
+        except:
+            e = sys.exc_info()
+            db.rollback()
         images = cursor.fetchall()
 
         return render_template('imageView.html', images = images)
@@ -77,16 +83,70 @@ def imageUpload():
                 numberofFaces = len(output_info)
                 numberofMasks = NumberOfMask(output_info)
                 numberOfFileInDatabase = getNumberOfFilesInDatabase()
-                finafilename = 'processed' + str(numberOfFileInDatabase) + '.' + filename.rsplit(".", 1)[1]
+                finafilename = 'processed' + str(numberOfFileInDatabase) + '.' + filename.rsplit(".",1)[1]
                 db = get_db()
                 cursor = db.cursor(dictionary=True)
+                try:
+                    db.start_transaction()
+                    query ='''insert into images values (%s,%s,%s,%s) for update'''
+                    cursor.execute(query, (session['username'],finafilename, numberofFaces,numberofMasks, ))
+                    db.commit()
+                    processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
+                    cv2.imwrite(processedSavePath, cv2.cvtColor(processedImage, cv2.COLOR_RGB2BGR))
+                    os.remove(savePath)
+                except:
+                    e = sys.exc_info()
+                    db.rollback()
+
+            return redirect("imageView")
+        if request.form['url'] != "":
+            url = request.form['url']
+
+            filename = os.path.join(app.config["IMAGE_UPLOADS"], 'temp.jpeg')
+            with open(filename, 'wb') as f:
+                response = requests.get(url, stream=True)
+                for block in response.iter_content(1024):
+                    if not block:
+                        break
+                    f.write(block)
+            print('Image sucessfully Downloaded: ')
+            output_info,processedImage = faceMaskDetection(filename)
+            numberofFaces = len(output_info)
+            numberofMasks = NumberOfMask(output_info)
+            numberOfFileInDatabase = getNumberOfFilesInDatabase()
+            finafilename = 'processed' + str(numberOfFileInDatabase) + '.' + filename.rsplit(".",1)[1]
+            db = get_db()
+            cursor = db.cursor(dictionary=True)
+            try:
+                db.start_transaction()
                 query ='''insert into images values (%s,%s,%s,%s)'''
                 cursor.execute(query, (session['username'],finafilename, numberofFaces,numberofMasks, ))
                 db.commit()
                 processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
-                cv2.imwrite(processedSavePath, processedImage)
+                cv2.imwrite(processedSavePath, cv2.cvtColor(processedImage, cv2.COLOR_RGB2BGR))
+                os.remove(filename)
+            except:
+                e = sys.exc_info()
+                db.rollback()
+
             return redirect("imageView")
+        else:
+            print('Image Couldn\'t be retreived')
+
     return render_template("imageUpload.html")
+
+
+@app.route('/imageDelete/<filename>', methods=['POST'])
+# Delete an object from a bucket
+def imageDelete(filename):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    query = '''DELETE FROM images WHERE filename=%s'''
+    cursor.execute(query, (filename,))
+    db.commit()
+    savePath = os.path.join(app.config["IMAGE_PROCESSED"], filename)
+    os.remove(savePath)
+    return redirect(url_for('imageView'))
 
 def faceMaskDetection(readFilePath):
     img = cv2.imread(readFilePath)

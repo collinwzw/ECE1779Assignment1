@@ -2,7 +2,7 @@ Dear {{ user.username }},
 
 Please receive your new password click on the following link:
 
-{{ newpsw }}
+{{ newpswd }}
 
 You need to change it as soon as possible.
 

@@ -6,12 +6,12 @@ from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, \
 from app.login import User
 
 
-class RegisterForm(FlaskForm):
+class AddUser(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('Email Address', validators=[DataRequired(), Email()])
     password1 = PasswordField('Password', validators=[DataRequired(message='Not Allowed Empty Password')])
     password2 = PasswordField('Please Repeat Password', validators=[DataRequired(), EqualTo('password1')])
-    submit = SubmitField('Register')
+    submit = SubmitField('Add New User')
 
     def validate_username(self, username):  # validate if this username is occupied
         pass  # wait for mysql import

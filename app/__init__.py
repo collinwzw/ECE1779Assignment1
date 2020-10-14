@@ -4,11 +4,13 @@ from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 
+
 app = Flask(__name__) #The __name__ variable passed to the Flask class is a Python predefined variable, which is set to the name of the module in which it is used.
 login = LoginManager(app)  #create and initialize login in app
 mail = Mail(app)
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
+
 
 
 app.secret_key = 'ece1779a1'

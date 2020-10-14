@@ -1,11 +1,11 @@
-from app import app, mail
-from flask import render_template, g, request, session, redirect, url_for, flash
-from flask_login import login_user, logout_user, current_user, login_required
-from app.main import get_db
-from app import db
+import random
+import string
+from flask import render_template, redirect, url_for, flash
+from flask_login import login_user, logout_user, current_user
 from flask_mail import Message
+from app import app, mail
+from app.form import LoginForm, AddUser, ForgetPassword
 from app.model import User
-from app.form import LoginForm,RegisterForm,ForgetPassword
 
 
 def send_email(subject, sender, recipients, text_body):
@@ -13,13 +13,18 @@ def send_email(subject, sender, recipients, text_body):
     msg.body = text_body
     mail.send(msg)
 
-def send_password_reset_email(user):
-    newpsw = "YUIOhfo33f3"
-    send_email('[Face Mask Detection] Your New Password',
+
+def send_password_reset_email(user, new_psw):
+    send_email('[Face Mask Detection Password Recovery] Your New Password',
                sender=app.config['ADMINS'][0],
                recipients=[user.email],
                text_body=render_template('email.txt',
-                                         user=user, newpsw='YUIOhfo33f3'))
+                                         user=user, newpswd=new_psw))
+
+
+def gen_password():
+    chars = string.ascii_letters + string.digits
+    return ''.join([random.choice(chars) for i in range(10)])
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -43,17 +48,27 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/adduser', methods=['GET', 'POST'])
 def register():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and User.username != 'admin':
+        flash('You are not admin')
         return redirect(url_for('index'))
-    form = RegisterForm()
+    form = AddUser()
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
-        flash('Add USER SUCESS')
-        return redirect(url_for('login'))
+        flash('ADD USER SUCCESS')
+        return redirect(url_for('usermanage'))
     return render_template('register.html', title='Register', form=form)
+
+@app.route('/usermanager',methods=['GET','POST'])
+def usermanager():
+    if current_user.is_authenticated and User.username != 'admin':
+        flash('You are not admin')
+        return redirect(url_for('index'))
+
+
+
 
 
 @app.route('/forgot', methods=['GET', 'POST'])
@@ -61,12 +76,12 @@ def reset_password():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = ForgetPassword()
-
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
-            send_password_reset_email(user)
-            user.set_password('YUIOhfo33f3')
+            new_password = gen_password()
+            user.set_password(new_password)
+            send_password_reset_email(user, new_password)
         flash('Your new password has been sent to your mailbox')
         return redirect(url_for('login'))
     return render_template('forgot.html', form=form)

@@ -32,7 +32,7 @@ def allowed_image(filename):
     if ext.upper() in app.config["ALLOWED_IMAGE_EXETENSIONS"]:
         return True
 
-@app.route('/sendImages/<filename>',methods = ["GET", "POST"])
+@app.route('/sendImages/<filename>/',methods = ["GET", "POST"])
 def sendImages(filename):
     #print(filename)
     image_path = os.path.join(app.config["IMAGE_PROCESSED"], filename)
@@ -87,8 +87,8 @@ def imageUpload():
                 db = get_db()
                 cursor = db.cursor(dictionary=True)
                 try:
-                    db.start_transaction()
-                    query ='''insert into images values (%s,%s,%s,%s) for update'''
+                    #db.start_transaction()
+                    query ='''insert into images values (%s,%s,%s,%s)'''
                     cursor.execute(query, (session['username'],finafilename, numberofFaces,numberofMasks, ))
                     db.commit()
                     processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
@@ -118,7 +118,7 @@ def imageUpload():
             db = get_db()
             cursor = db.cursor(dictionary=True)
             try:
-                db.start_transaction()
+                #db.start_transaction()
                 query ='''insert into images values (%s,%s,%s,%s)'''
                 cursor.execute(query, (session['username'],finafilename, numberofFaces,numberofMasks, ))
                 db.commit()

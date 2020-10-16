@@ -5,17 +5,8 @@ import cv2
 import os, sys
 from werkzeug.utils import secure_filename
 import requests
-import shutil
-sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection')
-sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection/models')
-sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection/load_model')
-sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection/utils')
-
 from FaceMaskDetection.pytorch_infer import inference
-from FaceMaskDetection.utils import anchor_decode,anchor_generator
 
-app.config["IMAGE_UPLOADS"]="/home/ubuntu/Desktop/ECE1779Assignment1/app/static/img/uploads"
-app.config["IMAGE_PROCESSED"]="/home/ubuntu/Desktop/ECE1779Assignment1/app/static/img/processed"
 app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG"]
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
@@ -26,10 +17,12 @@ def getNumberOfFilesInDatabase():
     cursor.execute(query)
     numberOfFiles = cursor.fetchall()
     return numberOfFiles[0][0]
+
 #method to check the type of file uploaded by user
 def allowed_image(filename):
     if not "." in filename:
         return False
+
     ext = filename.rsplit(".",1)[1]
     if ext.upper() in app.config["ALLOWED_IMAGE_EXETENSIONS"]:
         return True

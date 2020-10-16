@@ -1,8 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo,Length
-from wtforms.validators import email_validator
-from app.login import User
 
 
 class AddUserForm(FlaskForm):
@@ -29,5 +27,5 @@ class ChangePassword(FlaskForm):
 
 
 class Forgot(FlaskForm):
-    email = StringField('Email Address', validators=[DataRequired(), Email()])
+    email = StringField('Email Address', validators=[DataRequired()])
     submit = SubmitField('Reset your Password')

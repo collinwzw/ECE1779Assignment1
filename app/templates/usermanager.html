@@ -1,34 +1,27 @@
-{% extends "base.html" %}
 {% block content %}
 
 
-      <h3>
-         <a href = "{{ url_for('show all User') }}">Comments - Flask
-            SQLAlchemy example</a>
-      </h3>
-
-
-      <table>
+      <table class="table table-striped">
+        <caption>User Management</caption>
          <thead>
-            <tr>
-               <th>id</th>
-               <th>username</th>
-               <th>email</th>
-               <th>manager</th>
-            </tr>
+             <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>E-mail</th>
+                <th>Delete</th>
+             </tr>
          </thead>
-
          <tbody>
-            {% for user in user %}
+            {% for user in usertable %}
                <tr>
-                  <td>{{ user.id }}</td>
-                  <td>{{ user.username }}</td>
-                  <td>{{ user.email }}</td>
-                  <td><input type="button" value="Delete" οnclick="delete()"></td>
+                  <td>{{ id }}</td>
+                  <td>{{ username }}</td>
+                  <td>{{ email }}</td>
+                   <td><a herf="admin/usermanager/deleteuser/{{id}}}" method ='GET'>Delete</a></td>
                </tr>
             {% endfor %}
          </tbody>
-      </table>
+       </table>
 
-   </body>
+
 {% endblock %}

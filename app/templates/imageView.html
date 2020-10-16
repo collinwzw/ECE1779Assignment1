@@ -1,0 +1,74 @@
+{% extends 'layout.html' %}
+
+{% block title %}ImageList{% endblock %}
+
+{% block content %}
+
+<form action='{{url_for("imageUpload")}}' method='get'>
+    <input type='submit' value='Upload'/>
+</form>
+
+        </h1>image with no face detected</h1><br>
+        {% for image in images %}
+        {%if image['numberofFaces'] == 0 %}
+
+        <img src="{{url_for('sendImages', filename=image['filename'])}}" width="360" height="200">
+        </p>Number of Faces = {{ image['numberofFaces'] }}</p>
+        </p>Number of Masks = {{ image['numberofMasks'] }}</p>
+        <form action="{{url_for('imageDelete',filename=image['filename'])}}" method='post'>
+            <input type="submit" value="Delete"/>
+        </form>
+        <hr>
+        {% endif %}
+        {% endfor %}
+
+        </h1>image with all face are wearing masks</h1><br>
+        {% for image in images %}
+        {%if image['numberofFaces'] != 0 and image['numberofFaces'] == image['numberofMasks'] %}
+
+        <img src="{{url_for('sendImages', filename=image['filename'])}}" width="360" height="200">
+        </p>Number of Faces = {{ image['numberofFaces'] }}</p>
+        </p>Number of Masks = {{ image['numberofMasks'] }}</p>
+        <form action="{{url_for('imageDelete',filename=image['filename'])}}" method='post'>
+            <input type="submit" value="Delete"/>
+        </form>
+        <hr>
+        {% endif %}
+        {% endfor %}
+
+        </h1>image with all face are not wearing masks</h1><br>
+        {% for image in images %}
+        {%if image['numberofFaces'] != 0 and image['numberofMasks'] == 0 %}
+
+        <img src="{{url_for('sendImages', filename=image['filename'])}}" width="360" height="200">
+        </p>Number of Faces = {{ image['numberofFaces'] }}</p>
+        </p>Number of Masks = {{ image['numberofMasks'] }}</p>
+        <form action="{{url_for('imageDelete',filename=image['filename'])}}" method='post'>
+            <input type="submit" value="Delete"/>
+        </form>
+        <hr>
+        {% endif %}
+        {% endfor %}
+
+        </h1>image with only some face are wearing masks</h1><br>
+        <div class="row">
+            {% for image in images %}
+            {%if image['numberofFaces'] != 0 and image['numberofFaces'] > image['numberofMasks'] %}
+            <div class="column">
+
+                <img src="{{url_for('sendImages', filename=image['filename'])}}" width="360" height="200">
+                </p>Number of Faces = {{ image['numberofFaces'] }}</p>
+                </p>Number of Masks = {{ image['numberofMasks'] }}</p>
+                <form action="{{url_for('imageDelete',filename=image['filename'])}}" method='post'>
+                    <input type="submit" value="Delete"/>
+                </form>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+
+<!--        <img src="{{ image }}" alt="User Image">-->
+
+
+{% endblock %}

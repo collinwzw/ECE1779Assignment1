@@ -1,8 +1,6 @@
-Dear {{ user.username }},
+Dear {{ user }},
 
-Please receive your new password click on the following link:
-
-{{ newpswd }}
+You have request a password reset. You new password is {{ newpsw }}
 
 You need to change it as soon as possible.
 

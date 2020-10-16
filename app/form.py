@@ -1,23 +1,17 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, \
-    TextAreaField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, \
-    Length
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo,Length
+from wtforms.validators import email_validator
 from app.login import User
 
 
-class AddUser(FlaskForm):
+class AddUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
-    email = StringField('Email Address', validators=[DataRequired(), Email()])
+    email = StringField('Email Address', validators=[DataRequired()])
     password1 = PasswordField('Password', validators=[DataRequired(message='Not Allowed Empty Password')])
     password2 = PasswordField('Please Repeat Password', validators=[DataRequired(), EqualTo('password1')])
-    submit = SubmitField('Add New User')
-
-    def validate_username(self, username):  # validate if this username is occupied
-        pass  # wait for mysql import
-
-    def validate_email(self, email):  # validate if the email is used
-        pass
+    admin_auth = BooleanField('Admin')
+    submit = SubmitField('Add a new User')
 
 
 class LoginForm(FlaskForm):
@@ -34,6 +28,6 @@ class ChangePassword(FlaskForm):
     submit = SubmitField('Reset your Password')
 
 
-class ForgetPassword(FlaskForm):
+class Forgot(FlaskForm):
     email = StringField('Email Address', validators=[DataRequired(), Email()])
     submit = SubmitField('Reset your Password')

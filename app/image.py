@@ -83,7 +83,7 @@ def imageView():
             return render_template("imageUpload.html", message="database error: " + str(e))
         images = cursor.fetchall()
 
-        return render_template('imageView.html', images = images)
+        return render_template('imageView.html', message = "", images = images)
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
@@ -184,7 +184,7 @@ def imageUpload():
                 db.rollback()
                 return render_template("imageUpload.html", message="database error: " + str(e))
 
-            return redirect("imageView", message="image succesfully uploaded and processed")
+            return redirect("imageView")
         else:
             print('No file or url selected.')
             return render_template("imageUpload.html", message='No file or url selected')

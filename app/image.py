@@ -11,6 +11,10 @@ app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG"]
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
 def getNumberOfFilesInDatabase():
+    '''
+    method to get total number of files have been saved in the database
+    :return: integer that store number of files stored in database
+    '''
     db = get_db()
     cursor = db.cursor()
     query = '''select count(*) from images'''
@@ -18,24 +22,51 @@ def getNumberOfFilesInDatabase():
     numberOfFiles = cursor.fetchall()
     return numberOfFiles[0][0]
 
-#method to check the type of file uploaded by user
-def allowed_image(filename):
+
+def allowedImageType(filename):
+    '''
+    method to check the type of file uploaded by user
+    :param filename: the uploaded filename by user
+    :return: boolean. True if the image is one of allowed type, else False.
+    '''
     if not "." in filename:
         return False
-
     ext = filename.rsplit(".",1)[1]
     if ext.upper() in app.config["ALLOWED_IMAGE_EXETENSIONS"]:
         return True
 
+def allowedImageFilesize(filesize):
+    '''
+    method to check the filesize of the image uploaded by user
+    :param filesize: the uploaded filename by user
+    :return: boolean. True if the image size is under limit, else False.
+    '''
+    if int(filesize) <= app.config["MAX_IMAGE_FILESIZE"]:
+        return True
+    else:
+        return False
+
 @app.route('/sendImages/<filename>/',methods = ["GET", "POST"])
 def sendImages(filename):
-    #print(filename)
+    '''
+    controller that takes filename as input, find the image in local file system
+    and return the generated image by using function send_file.
+    it's been called in imageUpload html file.
+    :param filename: input filename
+    :return: sends the contents of a file to the html
+    '''
     image_path = os.path.join(app.config["IMAGE_PROCESSED"], filename)
-    print(image_path)
     return send_file(image_path)
 
 @app.route('/imageView')
 def imageView():
+    '''
+    controller that display the imageView page.
+    This controller will assert if user is already logged in or not.
+    If yes, go to the database and find out all the images history belong to this user and display
+    If no, it will redirect user to log in page.
+    :return:
+    '''
     # Check if user is loggedin
     if 'loggedin' in session:
         # We need all the account info for the user so we can display it on the profile page
@@ -49,6 +80,7 @@ def imageView():
         except:
             e = sys.exc_info()
             db.rollback()
+
         images = cursor.fetchall()
 
         return render_template('imageView.html', images = images)
@@ -59,41 +91,51 @@ def imageView():
 
 @app.route('/imageUpload', methods = ["GET", "POST"])
 def imageUpload():
+    '''
+    controller that allow user upload image.
+    This controller will assert if filesize, file type, filename and if the filename is secure.
+    If it pass all assertion, the system will store the original file
+    :return:
+    '''
     if request.method == "POST":
         if request.files:
-            #get the image object
-            image = request.files['image']
-            #check image name
-            if image.filename == '':
-                print("Image must have a file name")
-                return redirect(request.url)
-            if not allowed_image(image.filename):
-                print("Image is not in valid type")
-                return redirect(request.url)
-            else:
-                filename = secure_filename(image.filename)
-                savePath = os.path.join(app.config["IMAGE_UPLOADS"], image.filename)
-                image.save(savePath)
-                output_info,processedImage = faceMaskDetection(savePath)
-                numberofFaces = len(output_info)
-                numberofMasks = NumberOfMask(output_info)
-                numberOfFileInDatabase = getNumberOfFilesInDatabase()
-                finafilename = 'processed' + str(numberOfFileInDatabase) + '.' + filename.rsplit(".",1)[1]
-                db = get_db()
-                cursor = db.cursor(dictionary=True)
-                try:
-                    #db.start_transaction()
-                    query ='''insert into images values (%s,%s,%s,%s)'''
-                    cursor.execute(query, (session['username'],finafilename, numberofFaces,numberofMasks, ))
-                    db.commit()
-                    processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
-                    cv2.imwrite(processedSavePath, cv2.cvtColor(processedImage, cv2.COLOR_RGB2BGR))
-                    os.remove(savePath)
-                except:
-                    e = sys.exc_info()
-                    db.rollback()
+            if "filesize" in request.cookies:
+                if not allowedImageFilesize(request.cookies["filesize"]):
+                    print("Filesize exceeded maximum limit")
+                    return redirect(request.url)
+                #get the image object
+                image = request.files['image']
+                #check image name
+                if image.filename == '':
+                    print("Image must have a file name")
+                    return redirect(request.url)
+                if not allowedImageType(image.filename):
+                    print("Image is not in valid type")
+                    return redirect(request.url)
+                else:
+                    filename = secure_filename(image.filename)
+                    savePath = os.path.join(app.config["IMAGE_UPLOADS"], image.filename)
+                    image.save(savePath)
+                    output_info,processedImage = faceMaskDetection(savePath)
+                    numberofFaces = len(output_info)
+                    numberofMasks = NumberOfMask(output_info)
+                    numberOfFileInDatabase = getNumberOfFilesInDatabase()
+                    finafilename = 'processed' + str(numberOfFileInDatabase) + '.' + filename.rsplit(".",1)[1]
+                    db = get_db()
+                    cursor = db.cursor(dictionary=True)
+                    try:
+                        #db.start_transaction()
+                        query ='''insert into images values (%s,%s,%s,%s)'''
+                        cursor.execute(query, (session['username'],finafilename, numberofFaces,numberofMasks, ))
+                        db.commit()
+                        processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
+                        cv2.imwrite(processedSavePath, cv2.cvtColor(processedImage, cv2.COLOR_RGB2BGR))
+                        os.remove(savePath)
+                    except:
+                        e = sys.exc_info()
+                        db.rollback()
 
-            return redirect("imageView")
+                return redirect("imageView")
         if request.form['url'] != "":
             url = request.form['url']
 

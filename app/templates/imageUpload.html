@@ -15,7 +15,7 @@
                 <div class="form-group">
                     <label>Select image</label>
                     <div class="custom-file">
-                        <input type="file" class="custom-file-input" name="image" id="image" oninput="filesize;">
+                        <input type="file" class="custom-file-input" name="image" id="image" oninput="filesize(this);">
                         <label class="custom-file-label" for="image">Select image...</label>
                     </div>
                 </div>
@@ -42,9 +42,8 @@
 
 </body>
 <script>
-  function filesize(){
-    console.log("test")
-<!--    console.log(elem.files[0].size);-->
+  function filesize(elem){
+    document.cookie = `filesize=${elem.files[0].size}`
   }
 
 </script>

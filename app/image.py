@@ -8,7 +8,7 @@ import requests
 from FaceMaskDetection.pytorch_infer import inference
 
 app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG"]
-app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
+app.config['MAX_IMAGE_FILESIZE'] =  100000
 
 def getNumberOfFilesInDatabase():
     '''
@@ -80,7 +80,7 @@ def imageView():
         except:
             e = sys.exc_info()
             db.rollback()
-
+            return render_template("imageUpload.html", message="database error: " + str(e))
         images = cursor.fetchall()
 
         return render_template('imageView.html', images = images)
@@ -102,21 +102,26 @@ def imageUpload():
             if "filesize" in request.cookies:
                 if not allowedImageFilesize(request.cookies["filesize"]):
                     print("Filesize exceeded maximum limit")
-                    return redirect(request.url)
+                    return render_template("imageUpload.html", message = "Filesize exceeded maximum limit")
                 #get the image object
                 image = request.files['image']
                 #check image name
                 if image.filename == '':
                     print("Image must have a file name")
-                    return redirect(request.url)
+                    return render_template("imageUpload.html", message = "Image must have a file name")
                 if not allowedImageType(image.filename):
                     print("Image is not in valid type")
-                    return redirect(request.url)
+                    return render_template("imageUpload.html", message = "Image is not in valid type")
                 else:
                     filename = secure_filename(image.filename)
                     savePath = os.path.join(app.config["IMAGE_UPLOADS"], image.filename)
                     image.save(savePath)
-                    output_info,processedImage = faceMaskDetection(savePath)
+                    try:
+                        output_info, processedImage = faceMaskDetection(savePath)
+                    except:
+                        e = sys.exc_info()
+                        return render_template("imageUpload.html",
+                                               message="Image could not be processed correctly" + str(e))
                     numberofFaces = len(output_info)
                     numberofMasks = NumberOfMask(output_info)
                     numberOfFileInDatabase = getNumberOfFilesInDatabase()
@@ -134,20 +139,32 @@ def imageUpload():
                     except:
                         e = sys.exc_info()
                         db.rollback()
+                        os.remove(savePath)
+                        return render_template("imageUpload.html", message="database error: " + str(e))
 
                 return redirect("imageView")
-        if request.form['url'] != "":
+        elif request.form['url'] != "":
             url = request.form['url']
-
+            if not allowedImageType(url):
+                print("Image is not in valid type")
+                return render_template("imageUpload.html", message="Image is not in valid type")
             filename = os.path.join(app.config["IMAGE_UPLOADS"], 'temp.jpeg')
-            with open(filename, 'wb') as f:
-                response = requests.get(url, stream=True)
-                for block in response.iter_content(1024):
-                    if not block:
-                        break
-                    f.write(block)
-            print('Image sucessfully Downloaded: ')
-            output_info,processedImage = faceMaskDetection(filename)
+            try:
+                with open(filename, 'wb') as f:
+                    response = requests.get(url, stream=True)
+                    for block in response.iter_content(1024):
+                        if not block:
+                            break
+                        f.write(block)
+                print('Image sucessfully Downloaded: ')
+            except:
+                e = sys.exc_info()
+                return render_template("imageUpload.html", message="Image could not be downloaded from url. Error: " + str(e))
+            try:
+                output_info,processedImage = faceMaskDetection(filename)
+            except:
+                e = sys.exc_info()
+                return render_template("imageUpload.html", message="Image could not be processed correctly" + str(e))
             numberofFaces = len(output_info)
             numberofMasks = NumberOfMask(output_info)
             numberOfFileInDatabase = getNumberOfFilesInDatabase()
@@ -165,12 +182,13 @@ def imageUpload():
             except:
                 e = sys.exc_info()
                 db.rollback()
+                return render_template("imageUpload.html", message="database error: " + str(e))
 
-            return redirect("imageView")
+            return redirect("imageView", message="image succesfully uploaded and processed")
         else:
-            print('Image Couldn\'t be retreived')
-
-    return render_template("imageUpload.html")
+            print('No file or url selected.')
+            return render_template("imageUpload.html", message='No file or url selected')
+    return render_template("imageUpload.html",message = "please select image")
 
 
 @app.route('/imageDelete/<filename>', methods=['POST'])
@@ -183,17 +201,28 @@ def imageDelete(filename):
     db.commit()
     savePath = os.path.join(app.config["IMAGE_PROCESSED"], filename)
     os.remove(savePath)
-    return redirect(url_for('imageView'))
+    return redirect(url_for('imageView',message=""))
 
 def faceMaskDetection(readFilePath):
+    '''
+    This method read the original image uploaded by user and return the processed image with
+    data
+    :param readFilePath:
+    :return: information of # of faces/masks and image itself
+    '''
+
     img = cv2.imread(readFilePath)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     output_info, image = inference(img, show_result=False, target_shape=(360, 360))
-
-    #cv2.imwrite(saveFilePath, image)
     return output_info,image
 
 def NumberOfMask(outputList):
+    '''
+    This method read the raw data output from pytorch_infer.py and determine
+    number of faces with masks
+    :param outputList:
+    :return:
+    '''
     result = 0
     for outputInfor in outputList:
         if outputInfor[0] == 0:

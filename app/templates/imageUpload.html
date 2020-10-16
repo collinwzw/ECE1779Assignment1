@@ -1,19 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>Upload Image</head>
-
-<body>
+{% extends 'layout.html' %}
+{% block title %}<h1>Upload Image</h1>{% endblock %}
+{% block content %}
 <div class="container">
     <div class="row">
         <div class="col">
 
             <h1>Upload an image</h1>
-            <hr>
 
+
+            <p> {{ message }} </p>
             <form action="/imageUpload" method="POST" enctype="multipart/form-data">
 
                 <div class="form-group">
-                    <label>Select image</label>
+                    <label>Select image from local file</label>
                     <div class="custom-file">
                         <input type="file" class="custom-file-input" name="image" id="image" oninput="filesize(this);">
                         <label class="custom-file-label" for="image">Select image...</label>
@@ -40,13 +39,13 @@
     </div>
 </div>
 
-</body>
+{% endblock %}
 <script>
   function filesize(elem){
     document.cookie = `filesize=${elem.files[0].size}`
   }
 
 </script>
-</html>
+
 
 

@@ -1,4 +1,4 @@
-Dear {{ user }},
+Dear user,
 
 You have request a password reset. You new password is {{ newpsw }}
 

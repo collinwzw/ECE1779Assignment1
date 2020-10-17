@@ -18,6 +18,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 
+
 class ChangePassword(FlaskForm):
     username = StringField('Please input your Username', validators=[DataRequired(message='Empty Username')])
     password = PasswordField('Old Password', validators=[DataRequired(message='Empty Password')])

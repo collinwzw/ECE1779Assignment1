@@ -6,6 +6,7 @@ from app.main import get_db
 from flask_mail import Message
 from app.form import LoginForm,ChangePassword, Forgot, AddUserForm
 from werkzeug.security import generate_password_hash
+from app import bootstrap
 
 
 def send_email(subject, sender, recipients, text_body):
@@ -34,7 +35,7 @@ def is_admin(username):
     query = "SELECT * FROM accounts WHERE username = %s and admin_auth = 1"
     cursor.execute(query, (username))
     auth = cursor.fetchone()
-    return auth
+    return bool(auth)
 
 
 def delete_user(id):
@@ -42,7 +43,6 @@ def delete_user(id):
     cursor = db.cursor(dictionary=True)
     query = "Delete row FROM accounts WHERE id = %s"
     cursor.execute(query, id)
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -62,12 +62,12 @@ def login():
             session['loggedin'] = True
             session['id'] = account['id']
             session['username'] = account['username']
-            session['admin_auth'] = account['admin_auth']
+            session['admin_auth'] = is_admin(username)
         else:
             flash('Invalid username or password')
             return redirect(url_for('login'))
         # login_user(username, remember=form.remember_me.data)
-        return redirect(url_for('index'))
+        return redirect(url_for('home'))
     return render_template('login.html', title='Sign In', form=form)
 
 
@@ -136,7 +136,7 @@ def change_my_password():
 @app.route('/admin', methods=['GET,POST'])
 def admin():
     if session.get('admin_auth'):
-        return render_template('admin')
+        return render_template('admin.html')
     else:
         flash('You are not an admin')
         return redirect(url_for('login'))
@@ -173,29 +173,29 @@ def add_new_user():
 
     return render_template('adduser.html', title='Add New User', form=form)
 
-# @app.route('/admin/usermanager', method =['GET','POST'])
-# def user_manager():
-#     if session.get('admin_auth'):
-#         db = get_db()
-#         cursor = db.cursor(dictionary=True)
-#         cursor.execute('Select id, username，email from accounts')
-#         user_table = cursor.fetchall()
-#         return render_template('usermanager.html', usertable=user_table)
-#     else:
-#         flash('You are not an admin')
-#         return redirect(url_for('login'))
-#
-#
-#
-# @app.route('/admin/usermanger/deleteuser/<int:id>',method =['GET'])
-# def deleteuser():
-#     if session.get('admin_auth'):
-#         delete_user(id)
-#         db = get_db()
-#         cursor = db.cursor(dictionary=True)
-#         cursor.execute('Select id, username，email from accounts')
-#         user_table = cursor.fetchall()
-#         return render_template('usermanager.html', usertable=user_table)
+@app.route('/admin/usermanager', method =['GET','POST'])
+def userManager():
+    if session.get('admin_auth'):
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute('Select id, username，email from accounts')
+        user_table = cursor.fetchall()
+        return render_template('usermanager.html', usertable=user_table)
+    else:
+        flash('You are not an admin')
+        return redirect(url_for('login'))
+
+
+
+@app.route('/admin/usermanger/deleteuser/<int:id>',method =['GET'])
+def deleteuser():
+    if session.get('admin_auth'):
+        delete_user(id)
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute('Select id, username，email from accounts')
+        user_table = cursor.fetchall()
+        return render_template('usermanager.html', usertable=user_table)
 
 
 

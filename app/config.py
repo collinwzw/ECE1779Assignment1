@@ -12,3 +12,4 @@ sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection/ut
 
 app.config["IMAGE_UPLOADS"]="/home/ubuntu/Desktop/ECE1779Assignment1/app/static/img/uploads"
 app.config["IMAGE_PROCESSED"]="/home/ubuntu/Desktop/ECE1779Assignment1/app/static/img/processed"
+app.config["API_IMAGE_UPLOADS"]="/home/ubuntu/Desktop/ECE1779Assignment1/app/static/img/api_upload"

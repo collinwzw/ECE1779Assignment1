@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>API auto register</title>
+</head>
+<body>
+    <div class="autoRegister">
+        <h1>Register</h1>
+
+        <form action="{{url_for('api.registerResponse')}}" method="post" autocomplete="off">
+            <div>
+                <label for="username"></label>
+                Username <input type="text" name="username" id="username" required>
+            </div>
+            <div>
+                <label for="password"></label>
+                Password <input type="password" name="password" id="password" required>
+            </div>
+
+            <input type="submit" value="Register">
+            <input type="reset" value="Reset">
+        </form>
+    </div>
+</body>
+</html>

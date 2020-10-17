@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>API auto upload</title>
+</head>
+<body>
+    <div class="autoUpload">
+        <h1>Upload</h1>
+
+        <form id = "login" action="{{url_for('api.uploadResponse')}}" method="post" autocomplete="off" enctype="multipart/form-data">
+            <div>
+                <label for="username"></label>
+                Username <input type="text" name="username" id="username" required>
+            </div>
+            <div>
+                <label for="password"></label>
+                Password <input type="password" name="password" id="password" required>
+            </div>
+
+
+            <div class="form-group">
+                <label>Photo to upload</label>
+                <input type="file" class="custom-file-input" name="image" id="image" oninput="filesize;">
+
+            </div>
+            <button type="submit"  value="Submit">Submit</button>
+            <button type="reset" value="Reset">Reset</button>
+
+        </form>
+
+
+
+
+
+    </div>
+</body>
+</html>

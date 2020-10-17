@@ -8,14 +8,11 @@ from app.api.errors import error_response as api_error_response
 import cv2
 import os, sys
 from werkzeug.utils import secure_filename
-import shutil
-sys.path.insert(1, 'C:/Users/jshms/ECE1779Assignment1/FaceMaskDetection')
-sys.path.insert(1, 'C:/Users/jshms/ECE1779Assignment1/FaceMaskDetection/models')
-sys.path.insert(1, 'C:/Users/jshms/ECE1779Assignment1/FaceMaskDetection/load_model')
-sys.path.insert(1, 'C:/Users/jshms/ECE1779Assignment1/FaceMaskDetection/utils')
+
+
 from FaceMaskDetection.pytorch_infer import inference
 from FaceMaskDetection.utils import anchor_decode,anchor_generator
-app.config["IMAGE_UPLOADS"]="C:/Users/jshms/ECE1779Assignment1/app/static/img/api_upload"
+
 
 app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG"]
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
@@ -104,7 +101,7 @@ def uploadResponse():
                     return api_error_response(400, msg2)
                 else:
                     filename = secure_filename(image.filename)
-                    savePath = os.path.join(app.config["IMAGE_UPLOADS"], image.filename)
+                    savePath = os.path.join(app.config["API_IMAGE_UPLOADS"], image.filename)
                     image.save(savePath)
                     output_info, processedImage = faceMaskDetection(savePath)
                     numberofFaces = len(output_info)

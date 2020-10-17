@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>{% block title %}{% endblock %}</title>
+	</head>
+
+	<body class="loggedin">
+		<nav class="navtop">
+			<div>
+				<h1>Mask Detection Website</h1>
+
+                <a href="{{ url_for('home') }}"></i>Home</a>
+				<a href="{{ url_for('adduser') }}"></i>Add user</a>
+				<a href="{{ url_for('usermanage') }}"></i>User Manager</a>
+				<a href="{{ url_for('imageView') }}"></i>ImageList</a>
+				<a href="{{ url_for('imageUpload') }}"></i>Upload</a>
+				<a href="{{ url_for('logout') }}"></i>Logout</a>
+			</div>
+		</nav>
+		<hr>
+<!--		<div class="content">-->
+			{% block content %}{% endblock %}
+
+<!--		</div>-->
+	</body>
+<script>
+  function filesize(elem){
+    document.cookie = `filesize=${elem.files[0].size}`
+  }
+
+</script>
+</html>

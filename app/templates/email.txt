@@ -1,0 +1,8 @@
+Dear {{ user }},
+
+You have request a password reset. You new password is {{ newpsw }}
+
+You need to change it as soon as possible.
+
+
+Keep Safe and healthy!

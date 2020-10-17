@@ -1,0 +1,27 @@
+{% block content %}
+
+
+      <table class="table table-striped">
+        <caption>User Management</caption>
+         <thead>
+             <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>E-mail</th>
+                <th>Delete</th>
+             </tr>
+         </thead>
+         <tbody>
+            {% for user in usertable %}
+               <tr>
+                  <td>{{ user.id }}</td>
+                  <td>{{ user.username }}</td>
+                  <td>{{ user.email }}</td>
+                   <td><a class="button" href="/admin/usermanager/deleteuser/{{ user.id }}" method ='GET'>Delete</a></td>
+               </tr>
+            {% endfor %}
+         </tbody>
+       </table>
+
+
+{% endblock %}

@@ -10,4 +10,4 @@ from app import image
 from app.api import bp as api_bp
 app.register_blueprint(api_bp, url_prefix='/api')
 
-app.run()
+app.run('0.0.0.0',5000)

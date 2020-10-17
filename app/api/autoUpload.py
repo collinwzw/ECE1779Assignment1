@@ -15,7 +15,7 @@ from FaceMaskDetection.utils import anchor_decode,anchor_generator
 
 
 app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG"]
-app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
+app.config['MAX_IMAGE_FILESIZE'] =  100000
 
 def connect_to_database():
     return mysql.connector.connect(user=db_config['user'],
@@ -42,12 +42,22 @@ def getNumberOfFilesInDatabase():
     cursor.execute(query)
     numberOfFiles = cursor.fetchall()
     return numberOfFiles[0][0]
-def allowed_image(filename):
+def allowedImageType(filename):
     if not "." in filename:
         return False
     ext = filename.rsplit(".",1)[1]
     if ext.upper() in app.config["ALLOWED_IMAGE_EXETENSIONS"]:
         return True
+def allowedImageFilesize(filesize):
+    '''
+    method to check the filesize of the image uploaded by user
+    :param filesize: the uploaded filename by user
+    :return: boolean. True if the image size is under limit, else False.
+    '''
+    if int(filesize) <= app.config["MAX_IMAGE_FILESIZE"]:
+        return True
+    else:
+        return False
 
 def faceMaskDetection(readFilePath):
     img = cv2.imread(readFilePath)
@@ -90,22 +100,26 @@ def uploadResponse():
             session['username'] = account['username']
             # Redirect to home page
             if request.files:
-                # get the image object
-                image = request.files['image']
-                # check image name
-                if image.filename == '':
-                    msg2="Image must have a file name"
-                    return api_error_response(400, msg2)
-                if not allowed_image(image.filename):
-                    msg2="Image is not in valid type"
-                    return api_error_response(400, msg2)
-                else:
-                    filename = secure_filename(image.filename)
-                    savePath = os.path.join(app.config["API_IMAGE_UPLOADS"], image.filename)
-                    image.save(savePath)
-                    output_info, processedImage = faceMaskDetection(savePath)
-                    numberofFaces = len(output_info)
-                    numberofMasks = NumberOfMask(output_info)
+                if "filesize" in request.cookies:
+                    if not allowedImageFilesize(request.cookies["filesize"]):
+                        msg="Filesize exceeded maximum limit!"
+                        return api_error_response(400, msg)
+                    # get the image object
+                    image = request.files['image']
+                    # check image name
+                    if image.filename == '':
+                        msg="Image must have a file name"
+                        return api_error_response(400, msg)
+                    if not allowedImageType(image.filename):
+                        msg="Image is not in valid type"
+                        return api_error_response(400, msg)
+                    else:
+                        filename = secure_filename(image.filename)
+                        savePath = os.path.join(app.config["API_IMAGE_UPLOADS"], image.filename)
+                        image.save(savePath)
+                        output_info, processedImage = faceMaskDetection(savePath)
+                        numberofFaces = len(output_info)
+                        numberofMasks = NumberOfMask(output_info)
             return jsonify({
                 "success": True,
                 "payload": {

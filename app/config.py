@@ -7,11 +7,11 @@ db_config = {'user': 'root',
 
 
 
-sys.path.insert(1, '/Users/qiweifu/Documents/GitHub/ECE1779Assignment1/FaceMaskDetection/FaceMaskDetection')
-sys.path.insert(1, '/Users/qiweifu/Documents/GitHub/ECE1779Assignment1/FaceMaskDetection/models')
-sys.path.insert(1, '/Users/qiweifu/Documents/GitHub/ECE1779Assignment1/FaceMaskDetection/load_model')
-sys.path.insert(1, '/Users/qiweifu/Documents/GitHub/ECE1779Assignment1/FaceMaskDetection/utils')
+sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection')
+sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection/models')
+sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection/load_model')
+sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection/utils')
 
-app.config["IMAGE_UPLOADS"]="/Users/qiweifu/Documents/GitHub/ECE1779Assignment1/app/static/img/uploads"
-app.config["IMAGE_PROCESSED"]="/Users/qiweifu/Documents/GitHub/ECE1779Assignment1/app/static/img/processed"
-app.config["API_IMAGE_UPLOADS"]="/Users/qiweifu/Documents/GitHub/ECE1779Assignment1/app/static/img/api_upload"
+app.config["IMAGE_UPLOADS"]="/home/ubuntu/Desktop/ECE1779Assignment1/app/static/img/uploads"
+app.config["IMAGE_PROCESSED"]="/home/ubuntu/Desktop/ECE1779Assignment1/app/static/img/processed"
+app.config["API_IMAGE_UPLOADS"]="/home/ubuntu/Desktop/ECE1779Assignment1/app/static/img/api_upload"

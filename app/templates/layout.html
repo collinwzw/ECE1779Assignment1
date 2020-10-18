@@ -2,23 +2,11 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 {% block app_content %}
 
-	<head>
-		<meta charset="utf-8">
-		<title>{% block title %}{% endblock %}</title>
-	</head>
+<body>
+				<i><a href="{{ url_for('imageView') }}"></i>ImageList</a>
+				<i><a href="{{ url_for('imageUpload') }}"></i>Upload</a>
 
-	<body class="loggedin">
-		<nav class="navtop">
-			<div>
-				<h1>Mask Detection Website</h1>
 
-                <a href="{{ url_for('home') }}"></i>Home</a>
-				<a href="{{ url_for('imageView') }}"></i>ImageList</a>
-				<a href="{{ url_for('imageUpload') }}"></i>Upload</a>
-				<a href="{{ url_for('logout') }}"></i>Logout</a>
-			</div>
-		</nav>
-		<hr>
 <!--		<div class="content">-->
 			{% block content %}{% endblock %}
 

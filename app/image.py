@@ -7,8 +7,8 @@ from werkzeug.utils import secure_filename
 import requests
 from FaceMaskDetection.pytorch_infer import inference
 
-app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG"]
-app.config['MAX_IMAGE_FILESIZE'] =  100000
+app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG","JPG","PNG"]
+app.config['MAX_IMAGE_FILESIZE'] =  1024*1024
 
 def getNumberOfFilesInDatabase():
     '''
@@ -82,8 +82,21 @@ def imageView():
             db.rollback()
             return render_template("imageUpload.html", message="database error: " + str(e))
         images = cursor.fetchall()
+        noface = []
+        allFaceWithMask = []
+        allFaceNoMask = []
+        someFaceWithMask = []
+        for image in images:
+            if image['numberofFaces'] == 0:
+                noface.append(image)
+            elif image['numberofFaces'] == image['numberofMasks']:
+                allFaceWithMask.append((image))
+            elif image['numberofMasks'] == 0:
+                allFaceNoMask.append(image)
+            else:
+                someFaceWithMask.append(image)
 
-        return render_template('imageView.html', message = "", images = images)
+        return render_template('imageView.html', message = "", noface = noface,allFaceWithMask = allFaceWithMask,allFaceNoMask=allFaceNoMask,someFaceWithMask=someFaceWithMask )
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
@@ -97,99 +110,100 @@ def imageUpload():
     If it pass all assertion, the system will store the original file
     :return:
     '''
-    if request.method == "POST":
-        if request.files:
-            if "filesize" in request.cookies:
-                if not allowedImageFilesize(request.cookies["filesize"]):
-                    print("Filesize exceeded maximum limit")
-                    return render_template("imageUpload.html", message = "Filesize exceeded maximum limit")
-                #get the image object
-                image = request.files['image']
-                #check image name
-                if image.filename == '':
-                    print("Image must have a file name")
-                    return render_template("imageUpload.html", message = "Image must have a file name")
-                if not allowedImageType(image.filename):
+    if 'loggedin' in session:
+        if request.method == "POST":
+            if request.files:
+                if "filesize" in request.cookies:
+                    if not allowedImageFilesize(request.cookies["filesize"]):
+                        print("Filesize exceeded maximum limit")
+                        return render_template("imageUpload.html", message = "Filesize exceeded maximum limit")
+                    #get the image object
+                    image = request.files['image']
+                    #check image name
+                    if image.filename == '':
+                        print("Image must have a file name")
+                        return render_template("imageUpload.html", message = "Image must have a file name")
+                    if not allowedImageType(image.filename):
+                        print("Image is not in valid type")
+                        return render_template("imageUpload.html", message = "Image is not in valid type")
+                    else:
+                        filename = secure_filename(image.filename)
+                        savePath = os.path.join(app.config["IMAGE_UPLOADS"], image.filename)
+                        image.save(savePath)
+                        try:
+                            output_info, processedImage = faceMaskDetection(savePath)
+                        except:
+                            e = sys.exc_info()
+                            return render_template("imageUpload.html",
+                                                   message="Image could not be processed correctly" + str(e))
+                        numberofFaces = len(output_info)
+                        numberofMasks = NumberOfMask(output_info)
+                        numberOfFileInDatabase = getNumberOfFilesInDatabase()
+                        finafilename = 'processed' + str(numberOfFileInDatabase) + '.' + filename.rsplit(".",1)[1]
+                        db = get_db()
+                        cursor = db.cursor(dictionary=True)
+                        try:
+                            #db.start_transaction()
+                            query ='''insert into images values (%s,%s,%s,%s)'''
+                            cursor.execute(query, (session['username'],finafilename, numberofFaces,numberofMasks, ))
+                            db.commit()
+                            processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
+                            cv2.imwrite(processedSavePath, cv2.cvtColor(processedImage, cv2.COLOR_RGB2BGR))
+                            os.remove(savePath)
+                        except:
+                            e = sys.exc_info()
+                            db.rollback()
+                            os.remove(savePath)
+                            return render_template("imageUpload.html", message="database error: " + str(e))
+
+                    return redirect("imageView")
+            elif request.form['url'] != "":
+                url = request.form['url']
+                if not allowedImageType(url):
                     print("Image is not in valid type")
-                    return render_template("imageUpload.html", message = "Image is not in valid type")
-                else:
-                    filename = secure_filename(image.filename)
-                    savePath = os.path.join(app.config["IMAGE_UPLOADS"], image.filename)
-                    image.save(savePath)
-                    try:
-                        output_info, processedImage = faceMaskDetection(savePath)
-                    except:
-                        e = sys.exc_info()
-                        return render_template("imageUpload.html",
-                                               message="Image could not be processed correctly" + str(e))
-                    numberofFaces = len(output_info)
-                    numberofMasks = NumberOfMask(output_info)
-                    numberOfFileInDatabase = getNumberOfFilesInDatabase()
-                    finafilename = 'processed' + str(numberOfFileInDatabase) + '.' + filename.rsplit(".",1)[1]
-                    db = get_db()
-                    cursor = db.cursor(dictionary=True)
-                    try:
-                        #db.start_transaction()
-                        query ='''insert into images values (%s,%s,%s,%s)'''
-                        cursor.execute(query, (session['username'],finafilename, numberofFaces,numberofMasks, ))
-                        db.commit()
-                        processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
-                        cv2.imwrite(processedSavePath, cv2.cvtColor(processedImage, cv2.COLOR_RGB2BGR))
-                        os.remove(savePath)
-                    except:
-                        e = sys.exc_info()
-                        db.rollback()
-                        os.remove(savePath)
-                        return render_template("imageUpload.html", message="database error: " + str(e))
+                    return render_template("imageUpload.html", message="Image is not in valid type")
+                filename = os.path.join(app.config["IMAGE_UPLOADS"], 'temp.jpeg')
+                try:
+                    with open(filename, 'wb') as f:
+                        response = requests.get(url, stream=True)
+                        for block in response.iter_content(1024):
+                            if not block:
+                                break
+                            f.write(block)
+                    print('Image sucessfully Downloaded: ')
+                except:
+                    e = sys.exc_info()
+                    return render_template("imageUpload.html", message="Image could not be downloaded from url. Error: " + str(e))
+                try:
+                    output_info,processedImage = faceMaskDetection(filename)
+                except:
+                    e = sys.exc_info()
+                    return render_template("imageUpload.html", message="Image could not be processed correctly" + str(e))
+                numberofFaces = len(output_info)
+                numberofMasks = NumberOfMask(output_info)
+                numberOfFileInDatabase = getNumberOfFilesInDatabase()
+                finafilename = 'processed' + str(numberOfFileInDatabase) + '.' + filename.rsplit(".",1)[1]
+                db = get_db()
+                cursor = db.cursor(dictionary=True)
+                try:
+                    #db.start_transaction()
+                    query ='''insert into images values (%s,%s,%s,%s)'''
+                    cursor.execute(query, (session['username'],finafilename, numberofFaces,numberofMasks, ))
+                    db.commit()
+                    processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
+                    cv2.imwrite(processedSavePath, cv2.cvtColor(processedImage, cv2.COLOR_RGB2BGR))
+                    os.remove(filename)
+                except:
+                    e = sys.exc_info()
+                    db.rollback()
+                    return render_template("imageUpload.html", message="database error: " + str(e))
 
                 return redirect("imageView")
-        elif request.form['url'] != "":
-            url = request.form['url']
-            if not allowedImageType(url):
-                print("Image is not in valid type")
-                return render_template("imageUpload.html", message="Image is not in valid type")
-            filename = os.path.join(app.config["IMAGE_UPLOADS"], 'temp.jpeg')
-            try:
-                with open(filename, 'wb') as f:
-                    response = requests.get(url, stream=True)
-                    for block in response.iter_content(1024):
-                        if not block:
-                            break
-                        f.write(block)
-                print('Image sucessfully Downloaded: ')
-            except:
-                e = sys.exc_info()
-                return render_template("imageUpload.html", message="Image could not be downloaded from url. Error: " + str(e))
-            try:
-                output_info,processedImage = faceMaskDetection(filename)
-            except:
-                e = sys.exc_info()
-                return render_template("imageUpload.html", message="Image could not be processed correctly" + str(e))
-            numberofFaces = len(output_info)
-            numberofMasks = NumberOfMask(output_info)
-            numberOfFileInDatabase = getNumberOfFilesInDatabase()
-            finafilename = 'processed' + str(numberOfFileInDatabase) + '.' + filename.rsplit(".",1)[1]
-            db = get_db()
-            cursor = db.cursor(dictionary=True)
-            try:
-                #db.start_transaction()
-                query ='''insert into images values (%s,%s,%s,%s)'''
-                cursor.execute(query, (session['username'],finafilename, numberofFaces,numberofMasks, ))
-                db.commit()
-                processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
-                cv2.imwrite(processedSavePath, cv2.cvtColor(processedImage, cv2.COLOR_RGB2BGR))
-                os.remove(filename)
-            except:
-                e = sys.exc_info()
-                db.rollback()
-                return render_template("imageUpload.html", message="database error: " + str(e))
-
-            return redirect("imageView")
-        else:
-            print('No file or url selected.')
-            return render_template("imageUpload.html", message='No file or url selected')
-    return render_template("imageUpload.html",message = "please select image")
-
+            else:
+                print('No file or url selected.')
+                return render_template("imageUpload.html", message='No file or url selected')
+        return render_template("imageUpload.html",message = "please select image")
+    return redirect(url_for('login'))
 
 @app.route('/imageDelete/<filename>', methods=['POST'])
 # Delete an object from a bucket

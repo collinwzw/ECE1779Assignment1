@@ -1,7 +1,6 @@
 from app import app, mail
 import random
 import string
-import sys
 from flask import render_template, g, request, session, redirect, url_for, flash, current_app
 from app.main import get_db
 from flask_mail import Message
@@ -113,13 +112,8 @@ def reset_password():
             query = "update accounts set password_hash= %s WHERE email= %s"
             cursor.execute(query, (new_password_hash, useremail))
             cursor.execute("commit")
-            try:
-                send_password_reset_email(useremail,new_password)
-                flash('Your new password has been sent to your mailbox')
-            except:
-                e = sys.exc_info()
-                return render_template('resetpassword.html', form=form)
-                flash('Your new password has been sent to your mailbox')
+            send_password_reset_email(useremail,new_password)
+            flash('Your new password has been sent to your mailbox')
             return redirect(url_for('login'))
         else:
             flash('This email address is not registered')

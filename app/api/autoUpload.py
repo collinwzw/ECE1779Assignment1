@@ -15,7 +15,7 @@ from FaceMaskDetection.utils import anchor_decode,anchor_generator
 
 
 app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG"]
-app.config['MAX_IMAGE_FILESIZE'] = 100000
+app.config['MAX_IMAGE_FILESIZE'] =  100000
 
 def connect_to_database():
     return mysql.connector.connect(user=db_config['user'],
@@ -69,7 +69,7 @@ def faceMaskDetection(readFilePath):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     output_info, image = inference(img, show_result=False, target_shape=(360, 360))
 
-    #cv2.imwrite(saveFilePath, image)z
+    #cv2.imwrite(saveFilePath, image)
     return output_info,image
 
 def NumberOfMask(outputList):
@@ -92,6 +92,9 @@ def upload():
     controller that allow user who log in to upload image.
     :return:json responses
     '''
+    if request.method == 'GET':
+        return render_template('api/autoUpload.html')
+
     msg = ''
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         # Create variables for easy access
@@ -130,12 +133,12 @@ def upload():
                         output_info, processedImage = faceMaskDetection(savePath)
                         numberofFaces = len(output_info)
                         numberofMasks = NumberOfMask(output_info)
-                        return jsonify({
-                            "success": True,
-                            "payload": {
-                            "num_faces":numberofFaces ,
-                            "num_masked": numberofMasks,
-                            "num_unmasked": numberofFaces-numberofMasks}})
+            return jsonify({
+                "success": True,
+                "payload": {
+                "num_faces":numberofFaces ,
+                "num_masked": numberofMasks,
+                "num_unmasked": numberofFaces-numberofMasks}})
         else:
             # Account doesnt exist or username/password incorrect
             msg = 'Incorrect username/password!'

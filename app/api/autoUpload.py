@@ -133,16 +133,16 @@ def upload():
                         output_info, processedImage = faceMaskDetection(savePath)
                         numberofFaces = len(output_info)
                         numberofMasks = NumberOfMask(output_info)
-            return jsonify({
-                "success": True,
-                "payload": {
-                "num_faces":numberofFaces ,
-                "num_masked": numberofMasks,
-                "num_unmasked": numberofFaces-numberofMasks}})
+                    return jsonify({
+                        "success": True,
+                        "payload": {
+                        "num_faces":numberofFaces ,
+                        "num_masked": numberofMasks,
+                        "num_unmasked": numberofFaces-numberofMasks}})
         else:
             # Account doesnt exist or username/password incorrect
             msg = 'Incorrect username/password!'
             return api_error_response(401, msg)
-    return render_template('api/autoUpload.html')
+
 
 

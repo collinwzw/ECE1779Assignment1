@@ -92,12 +92,7 @@ def upload():
     controller that allow user who log in to upload image.
     :return:json responses
     '''
-    if request.method == 'GET':
-        return render_template('api/autoUpload.html')
-
     msg = ''
-    if request.method == 'GET':
-        return render_template('api/autoUpload.html')
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         # Create variables for easy access
         username = request.form['username']
@@ -113,7 +108,6 @@ def upload():
             session['loggedin'] = True
             session['id'] = account['id']
             session['username'] = account['username']
-            # Redirect to home page
             if request.files:
                 if "filesize" in request.cookies:
                     if not allowedImageFilesize(request.cookies["filesize"]):
@@ -142,13 +136,12 @@ def upload():
                             "num_masked": numberofMasks,
                             "num_unmasked": numberofFaces-numberofMasks}})
                 else:
-                    msg = 'No image is chosen! '
+                    msg = 'filesize not in request.cookies'
                     return api_error_response(400, msg)
-
         else:
             # Account doesnt exist or username/password incorrect
             msg = 'Incorrect username/password!'
             return api_error_response(401, msg)
-
+    return render_template('api/autoUpload.html')
 
 

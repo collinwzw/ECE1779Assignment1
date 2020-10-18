@@ -1,18 +1,20 @@
 from app import app, mail
 import random
 import string
-from flask import render_template, g, request, session, redirect, url_for, flash
+from flask import render_template, g, request, session, redirect, url_for, flash, current_app
 from app.main import get_db
 from flask_mail import Message
 from app.form import LoginForm,ChangePassword, ResetPassword, AddUserForm
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash,check_password_hash
 from app import bootstrap
 
 
 def send_email(subject, sender, recipients, text_body):
+    print(current_app)
     msg = Message(subject, sender=sender, recipients=recipients)
     msg.body = text_body
     mail.send(msg)
+
 
 
 def generate_password():
@@ -29,13 +31,13 @@ def send_password_reset_email(email, new_password):
                text_body=render_template('email.txt', newpsw=new_password))
 
 
-def is_admin(username):
-    db = get_db()
-    cursor = db.cursor(dictionary=True)
-    query = "SELECT count(1) FROM accounts WHERE username = %s and admin_auth = 1"
-    cursor.execute(query, (username,))
-    auth = cursor.fetchone()
-    return bool(auth)
+# def is_admin(username):
+#     db = get_db()
+#     cursor = db.cursor(dictionary=True)
+#     query = "SELECT count(1) FROM accounts WHERE username = %s and admin_auth = 1"
+#     cursor.execute(query, (username,))
+#     auth = cursor.fetchone()
+#     return bool(auth)
 
 
 def delete_user(id):
@@ -55,24 +57,31 @@ def login():
         return render_template('login.html', title='Sign In', form=form)
     if request.method == "POST":
         if 'loggedin' in session:
-            return redirect(url_for('index'))
+            return redirect(url_for('home'))
         if form.validate_on_submit():
             username = form.username.data
-            password_hash = generate_password_hash(form.password.data)
+            password = form.password.data
             db = get_db()
             cursor = db.cursor(dictionary=True)
-            query = "SELECT * FROM accounts WHERE username = %s AND password_hash = %s"
-            cursor.execute(query, (username, password_hash))
+            query = "SELECT * FROM accounts WHERE username = %s"
+            cursor.execute(query, (username,))
             account = cursor.fetchone()
             if account:
-                session['loggedin'] = True
-                session['id'] = account['id']
-                session['username'] = account['username']
-                session['admin_auth'] = is_admin(username)
-            else:
-                flash('Invalid username or password')
-                return redirect(url_for('login'))
-            return redirect(url_for('index'))
+                if check_password_hash(str(account['password_hash']),password):
+                    session['loggedin'] = True
+                    session['id'] = account['id']
+                    session['username'] = account['username']
+                    session['admin_auth'] = bool(account['admin_auth'])
+                    flash('Login successfully!')
+                    return  redirect(url_for('home'))
+                else:
+                    flash('Invalid username or password')
+                    return redirect(url_for('login'))
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        else:
+            return redirect(url_for('login'))
+
 
 
 @app.route('/logout')
@@ -93,7 +102,7 @@ def reset_password():
         useremail = form.email.data
         db = get_db()
         cursor = db.cursor(dictionary=True)
-        query = "SELECT count(1) FROM accounts WHERE email= %s"
+        query = "SELECT * FROM accounts WHERE email= %s"
         cursor.execute(query, (useremail,))
         mail_exist = cursor.fetchone()
         if mail_exist:
@@ -104,12 +113,12 @@ def reset_password():
             query = "update accounts set password_hash= %s WHERE email= %s"
             cursor.execute(query, (new_password_hash, useremail))
             cursor.execute("commit")
-            # send_password_reset_email(useremail,new_password)
+            send_password_reset_email(useremail,new_password)
             flash('Your new password has been sent to your mailbox')
             return redirect(url_for('login'))
         else:
             flash('This email address is not registered')
-            return redirect('index')
+            return redirect('reset_password')
     return render_template('resetpassword.html', form=form)
 
 
@@ -182,7 +191,7 @@ def userManager():
         return render_template('usermanager.html', usertable=user_table)
     else:
         flash('You are not an admin')
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
 
 
 @app.route('/admin/usermanager/deleteuser/<int:id>',methods =['GET'])
@@ -194,12 +203,3 @@ def deleteuser(id):
         cursor.execute('Select id, username, email from accounts')
         user_table = cursor.fetchall()
         return render_template('usermanager.html', usertable=user_table)
-
-
-
-
-
-
-
-
-

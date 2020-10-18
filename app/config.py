@@ -6,13 +6,6 @@ db_config = {'user': 'root',
              'database': 'ece1779a1'}
 
 
-MAIL_SERVER = 'smtp.googlemail.com'
-MAIL_PORT = 587
-MAIL_USE_TLS = 1
-MAIL_USERNAME = 'ece1779group'
-MAIL_PASSWORD = 'ikztppjrmazekwly'
-ADMINS = ['ece1779group@gmail.com']
-
 
 sys.path.insert(1, '/Users/qiweifu/Documents/GitHub/ECE1779Assignment1/FaceMaskDetection/FaceMaskDetection')
 sys.path.insert(1, '/Users/qiweifu/Documents/GitHub/ECE1779Assignment1/FaceMaskDetection/models')

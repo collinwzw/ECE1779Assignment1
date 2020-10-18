@@ -10,9 +10,11 @@ from app import bootstrap
 
 
 def send_email(subject, sender, recipients, text_body):
+    print(current_app)
     msg = Message(subject, sender=sender, recipients=recipients)
     msg.body = text_body
     mail.send(msg)
+
 
 
 
@@ -117,8 +119,9 @@ def reset_password():
             return redirect(url_for('login'))
         else:
             flash('This email address is not registered')
-            return redirect(url_for('resetpassword'))
+            return redirect('index')
     return render_template('resetpassword.html', form=form)
+
 
 
 @app.route('/changemypassword', methods=['POST', 'GET'])

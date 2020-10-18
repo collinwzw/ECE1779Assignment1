@@ -1,5 +1,7 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block app_content %}
+
 	<head>
 		<meta charset="utf-8">
 		<title>{% block title %}{% endblock %}</title>
@@ -28,4 +30,4 @@
   }
 
 </script>
-</html>
+{% endblock %}

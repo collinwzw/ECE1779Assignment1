@@ -96,6 +96,8 @@ def upload():
         return render_template('api/autoUpload.html')
 
     msg = ''
+    if request.method == 'GET':
+        return render_template('api/autoUpload.html')
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         # Create variables for easy access
         username = request.form['username']
@@ -133,12 +135,16 @@ def upload():
                         output_info, processedImage = faceMaskDetection(savePath)
                         numberofFaces = len(output_info)
                         numberofMasks = NumberOfMask(output_info)
-                    return jsonify({
-                        "success": True,
-                        "payload": {
-                        "num_faces":numberofFaces ,
-                        "num_masked": numberofMasks,
-                        "num_unmasked": numberofFaces-numberofMasks}})
+                        return jsonify({
+                            "success": True,
+                            "payload": {
+                            "num_faces":numberofFaces ,
+                            "num_masked": numberofMasks,
+                            "num_unmasked": numberofFaces-numberofMasks}})
+                else:
+                    msg = 'No image is chosen! '
+                    return api_error_response(400, msg)
+
         else:
             # Account doesnt exist or username/password incorrect
             msg = 'Incorrect username/password!'

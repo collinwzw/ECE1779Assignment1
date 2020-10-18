@@ -22,12 +22,15 @@ def teardown_db(exception):
     if db is not None:
         db.close()
 
-@bp.route('/register', methods=['GET'])
-def auto_register():
-    return render_template('api/autoRegister.html')
 
-@bp.route('/register', methods=['POST'])
-def registerResponse():
+@bp.route('/register', methods=['GET','POST'])
+def register():
+    '''
+    controller that allow register.
+    :return:json responds
+    '''
+    if request.method == 'GET':
+        return render_template('api/autoRegister.html')
     msg = ''
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         # Create variables for easy access

@@ -35,14 +35,12 @@ def teardown_db(exception):
     if db is not None:
         db.close()
 
-def getNumberOfFilesInDatabase():
-    db = get_db()
-    cursor = db.cursor()
-    query = '''select count(*) from images'''
-    cursor.execute(query)
-    numberOfFiles = cursor.fetchall()
-    return numberOfFiles[0][0]
 def allowedImageType(filename):
+    '''
+    method to check the type of file uploaded by user
+    :param filename: the uploaded filename by user
+    :return: boolean. True if the image is one of allowed type, else False.
+    '''
     if not "." in filename:
         return False
     ext = filename.rsplit(".",1)[1]
@@ -60,6 +58,13 @@ def allowedImageFilesize(filesize):
         return False
 
 def faceMaskDetection(readFilePath):
+    '''
+    This method read the original image uploaded by user and return the processed image with
+    data
+    :param readFilePath:
+    :return: information of # of faces/masks and image itself
+    '''
+
     img = cv2.imread(readFilePath)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     output_info, image = inference(img, show_result=False, target_shape=(360, 360))
@@ -68,21 +73,26 @@ def faceMaskDetection(readFilePath):
     return output_info,image
 
 def NumberOfMask(outputList):
+    '''
+    This method read the raw data output from pytorch_infer.py and determine
+    number of faces with masks
+    :param outputList:
+    :return:
+    '''
     result = 0
     for outputInfor in outputList:
         if outputInfor[0] == 0:
             result = result + 1
     return result
 
-@bp.route('/upload', methods=['GET'])
-def auto_upload():
-    return render_template('api/autoUpload.html')
-
 
 @bp.route('/upload', methods=['GET','POST'])
-def uploadResponse():
+def upload():
+    '''
+    controller that allow user who log in to upload image.
+    :return:json responses
+    '''
     msg = ''
-    # Output message if something goes wrong...
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         # Create variables for easy access
         username = request.form['username']
@@ -130,6 +140,6 @@ def uploadResponse():
             # Account doesnt exist or username/password incorrect
             msg = 'Incorrect username/password!'
             return api_error_response(401, msg)
-
+    return render_template('api/autoUpload.html')
 
 

@@ -105,8 +105,9 @@ def reset_password():
             query = "update accounts set password_hash= %s WHERE email= %s"
             cursor.execute(query, (new_password_hash, useremail))
             cursor.execute("commit")
-            send_password_reset_email(useremail,new_password)
             flash('Your new password has been sent to your mailbox')
+            redirect('login')
+            send_password_reset_email(useremail,new_password)
             return redirect(url_for('login'))
         else:
             flash('This email address is not registered')

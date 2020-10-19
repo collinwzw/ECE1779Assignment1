@@ -28,8 +28,8 @@ def teardown_db(exception):
 def index():
     if 'loggedin' in session:
         # User is loggedin show them the home page
-        return render_template('home.html', username=session['username'])
-    # User is not loggedin redirect to login page
+        return redirect('home')
+    # User is not loggedin redirect to login pa ge
     return render_template("main.html")
 
 # @app.route('/login', methods=['GET', 'POST'])

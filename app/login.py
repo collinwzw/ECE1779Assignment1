@@ -119,7 +119,7 @@ def reset_password():
             return redirect(url_for('login'))
         else:
             flash('This email address is not registered')
-            return redirect('index')
+            return redirect('resetpassword')
     return render_template('resetpassword.html', form=form)
 
 

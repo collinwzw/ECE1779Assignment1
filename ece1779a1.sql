@@ -1,6 +1,6 @@
--- MySQL dump 10.13  Distrib 8.0.21, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.21, for macos10.15 (x86_64)
 --
--- Host: 127.0.0.1    Database: ece1779a1
+-- Host: localhost    Database: ece1779a1
 -- ------------------------------------------------------
 -- Server version	8.0.21
 
@@ -25,10 +25,11 @@ DROP TABLE IF EXISTS `accounts`;
 CREATE TABLE `accounts` (
   `id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
   `email` varchar(100) NOT NULL,
+  `admin_auth` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10034 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -37,7 +38,7 @@ CREATE TABLE `accounts` (
 
 LOCK TABLES `accounts` WRITE;
 /*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
-INSERT INTO `accounts` VALUES (1,'test','test','test@test.com'),(3,'test1','test1','test1@mail.com');
+INSERT INTO `accounts` VALUES (10031,'test','pbkdf2:sha256:150000$7NLok2RU$c75d3231ba4b10760acb25df9f6eebaeea05db58b6dff934b2f0b856f02a5a4e','123@11233.com',1),(10032,'test2','pbkdf2:sha256:150000$7NLok2RU$c75d3231ba4b10760acb25df9f6eebaeea05db58b6dff934b2f0b856f02a5a4e','testt1@ffewa.com',0),(10033,'test1f','pbkdf2:sha256:150000$A2WVT8rV$f91c50b5d3684e4cab005ad5fca930245b108a79b8fe6b3d09ad6d662aa3a3bd','test13@test.com',0);
 /*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -49,7 +50,7 @@ DROP TABLE IF EXISTS `images`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `images` (
-  `username` varchar(50) DEFAULT NULL,
+  `id` int NOT NULL,
   `filename` varchar(20) NOT NULL,
   `numberofFaces` int DEFAULT NULL,
   `numberofMasks` int DEFAULT NULL,
@@ -75,4 +76,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-10-14 11:56:37
+-- Dump completed on 2020-10-19  1:49:29

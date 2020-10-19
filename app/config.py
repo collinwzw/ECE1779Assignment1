@@ -3,7 +3,9 @@ import sys
 db_config = {'user': 'root',
              'password': 'ece1779pass',
              'host': '127.0.0.1',
-             'database': 'ece1779a1'}
+             'database': 'ece1779'}
+
+
 
 sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection')
 sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection/models')

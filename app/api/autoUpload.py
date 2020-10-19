@@ -8,14 +8,15 @@ from app.api.errors import error_response as api_error_response
 import cv2
 import os, sys
 from werkzeug.utils import secure_filename
-
+from werkzeug.exceptions import RequestEntityTooLarge
 
 from FaceMaskDetection.pytorch_infer import inference
 from FaceMaskDetection.utils import anchor_decode,anchor_generator
 
 
 app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG"]
-app.config['MAX_IMAGE_FILESIZE'] =  100000
+#app.config['MAX_IMAGE_FILESIZE'] =  100000
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
 def connect_to_database():
     return mysql.connector.connect(user=db_config['user'],
@@ -52,7 +53,7 @@ def allowedImageFilesize(filesize):
     :param filesize: the uploaded filename by user
     :return: boolean. True if the image size is under limit, else False.
     '''
-    if int(filesize) <= app.config["MAX_IMAGE_FILESIZE"]:
+    if int(filesize) <= app.config["MAX_CONTENT_LENGTH"]:
         return True
     else:
         return False
@@ -109,35 +110,37 @@ def upload():
             session['id'] = account['id']
             session['username'] = account['username']
             if request.files:
-                if "filesize" in request.cookies:
-                    if not allowedImageFilesize(request.cookies["filesize"]):
-                        msg="Filesize exceeded maximum limit!"
-                        return api_error_response(400, msg)
+                image = request.files['image']
                     # get the image object
-                    image = request.files['image']
                     # check image name
-                    if image.filename == '':
-                        msg="Image must have a file name"
-                        return api_error_response(400, msg)
-                    if not allowedImageType(image.filename):
-                        msg="Image is not in valid type"
-                        return api_error_response(400, msg)
-                    else:
-                        filename = secure_filename(image.filename)
-                        savePath = os.path.join(app.config["API_IMAGE_UPLOADS"], image.filename)
-                        image.save(savePath)
-                        output_info, processedImage = faceMaskDetection(savePath)
-                        numberofFaces = len(output_info)
-                        numberofMasks = NumberOfMask(output_info)
-                        return jsonify({
-                            "success": True,
-                            "payload": {
-                            "num_faces":numberofFaces ,
-                            "num_masked": numberofMasks,
-                            "num_unmasked": numberofFaces-numberofMasks}})
-                else:
-                    msg = 'filesize not in request.cookies'
+                if image.filename == '':
+                    msg="Image must have a file name"
                     return api_error_response(400, msg)
+                if not allowedImageType(image.filename):
+                    msg="Image is not in valid type"
+                    return api_error_response(400, msg)
+
+                else:
+
+                    filename = secure_filename(image.filename)
+                    savePath = os.path.join(app.config["API_IMAGE_UPLOADS"], image.filename)
+                    image.save(savePath)
+                    output_info, processedImage = faceMaskDetection(savePath)
+                    numberofFaces = len(output_info)
+                    numberofMasks = NumberOfMask(output_info)
+                    return jsonify({
+                        "success": True,
+                        "payload": {
+                        "num_faces":numberofFaces ,
+                        "num_masked": numberofMasks,
+                        "num_unmasked": numberofFaces-numberofMasks}})
+
+                #except Exception as e:
+                    #msg = "Image is too large!" + str(e)
+                    #return api_error_response(413, msg)
+
+
+
         else:
             # Account doesnt exist or username/password incorrect
             msg = 'Incorrect username/password!'

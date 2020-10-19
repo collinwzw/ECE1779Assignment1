@@ -122,24 +122,30 @@ def change_my_password():
         return render_template('changemypassword.html', form=form)
     if request.method == 'POST'and form.validate_on_submit():
         username = form.username.data
-        old_password_hash = generate_password_hash(form.password.data)
+        old_password = form.password.data
         new_password_hash = generate_password_hash(form.password1.data)
         db = get_db()
         cursor = db.cursor(dictionary=True)
-        query = "SELECT count(1) FROM accounts WHERE username = %s AND password_hash = %s"
-        cursor.execute(query, (username, old_password_hash))
+        query = "SELECT * FROM accounts WHERE username = %s"
+        cursor.execute(query, (username,))
         account = cursor.fetchone()
         if account:
-            db= get_db()
-            cursor = db.cursor(dictionary=True)
-            query = "update accounts set password_hash= %s WHERE username= %s"
-            cursor.execute(query, (new_password_hash, username))
-            cursor.execute("commit")
-            flash('Your password has been changed')
-            return redirect(url_for('login'))
+            if check_password_hash(str(account['password_hash']), old_password):
+                db = get_db()
+                cursor = db.cursor(dictionary=True)
+                query = "update accounts set password_hash= %s WHERE username= %s"
+                cursor.execute(query, (new_password_hash, username))
+                cursor.execute("commit")
+                flash('Your password has been changed')
+                return redirect(url_for('login'))
+            else:
+                flash('Invalid username or password')
+                return redirect(url_for('change_my_password'))
         else:
             flash('Invalid username or password')
-            return redirect(url_for('changemypassword'))
+            return redirect(url_for('change_my_password'))
+    else:
+        return render_template('changemypassword.html', form=form)
 
 
 @app.route('/admin/adduser', methods=['GET', 'POST'])

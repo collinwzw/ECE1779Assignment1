@@ -98,7 +98,7 @@ def logout():
 @app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
     """Controller that display the reset_password page. Only user_email is needed to be input.
-    Controller """
+    Controller will validate the email in database and try to """
     form = ResetPassword()
     if form.validate_on_submit():
         user_email = form.email.data

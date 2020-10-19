@@ -9,6 +9,7 @@ import cv2
 import os, sys
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
+from werkzeug.security import generate_password_hash,check_password_hash
 
 from FaceMaskDetection.pytorch_infer import inference
 from FaceMaskDetection.utils import anchor_decode,anchor_generator
@@ -105,49 +106,59 @@ def upload():
         password = request.form['password']
         db = get_db()
         cursor = db.cursor(dictionary=True)
-        query = "SELECT * FROM accounts WHERE username = %s AND password = %s"
-        cursor.execute(query, (username, password))
+        query = "SELECT * FROM accounts WHERE username = %s"
+        cursor.execute(query, (username,))
         account = cursor.fetchone()
 
         if account:
             # Create session data, we can access this data in other routes
-            session['loggedin'] = True
-            session['id'] = account['id']
-            session['username'] = account['username']
-            if request.files:
-                image = request.files['image']
+            if check_password_hash(str(account['password_hash']), password):
+                session['loggedin'] = True
+                session['id'] = account['id']
+                session['username'] = account['username']
+                session['admin_auth'] = bool(account['admin_auth'])
+
+                if request.files:
+                    if "filesize" in request.cookies:
+                        if not allowedImageFilesize(request.cookies["filesize"]):
+                            msg ="Filesize exceeded maximum limit!"
+                            return api_error_response(413, msg)
+                    image = request.files['file']
                     # get the image object
                     # check image name
-                if image.filename == '':
-                    msg="Image must have a file name"
-                    return api_error_response(400, msg)
-                if not allowedImageType(image.filename):
-                    msg="Image is not in valid type"
-                    return api_error_response(400, msg)
+                    if image.filename == '':
+                        msg="Image must have a file name"
+                        return api_error_response(400, msg)
+                    if not allowedImageType(image.filename):
+                        msg="Image is not in valid type"
+                        return api_error_response(400, msg)
 
-                else:
+                    else:
 
-                    filename = secure_filename(image.filename)
-                    savePath = os.path.join(app.config["API_IMAGE_UPLOADS"], image.filename)
-                    image.save(savePath)
-                    output_info, processedImage = faceMaskDetection(savePath)
-                    numberofFaces = len(output_info)
-                    numberofMasks = NumberOfMask(output_info)
-                    return jsonify({
-                        "success": True,
-                        "payload": {
-                        "num_faces":numberofFaces ,
-                        "num_masked": numberofMasks,
-                        "num_unmasked": numberofFaces-numberofMasks}})
+                        filename = secure_filename(image.filename)
+                        savePath = os.path.join(app.config["API_IMAGE_UPLOADS"], image.filename)
+                        image.save(savePath)
+                        output_info, processedImage = faceMaskDetection(savePath)
+                        numberofFaces = len(output_info)
+                        numberofMasks = NumberOfMask(output_info)
+                        return jsonify({
+                            "success": True,
+                            "payload": {
+                            "num_faces":numberofFaces ,
+                            "num_masked": numberofMasks,
+                            "num_unmasked": numberofFaces-numberofMasks}})
 
-                #except Exception as e:
-                    #msg = "Image is too large!" + str(e)
-                    #return api_error_response(413, msg)
+                        #except Exception as e:
+                            #msg = "Image is too large!" + str(e)
+                            #return api_error_response(413, msg)
 
 
 
+            else:
+                # Account doesnt exist or username/password incorrect
+                msg = 'Incorrect username/password!'
+                return api_error_response(401, msg)
         else:
-            # Account doesnt exist or username/password incorrect
             msg = 'Incorrect username/password!'
             return api_error_response(401, msg)
     return render_template('api/autoUpload.html')

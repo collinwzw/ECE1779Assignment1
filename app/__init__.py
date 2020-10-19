@@ -26,4 +26,4 @@ from app import config
 from app.api import bp as api_bp
 app.register_blueprint(api_bp, url_prefix='/api')
 
-app.run('0.0.0.0',5000)
+app.run('0.0.0.0',5000,debug=False)

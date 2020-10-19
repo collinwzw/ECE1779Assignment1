@@ -19,7 +19,7 @@
             </div>
             <div >
                 <label>Photo to upload</label>
-                <input type="file" class="custom-file-input" name="image" id="image">
+                <input type="file" class="custom-file-input" name="file" id="file" oninput="filesize(this);">
 
             </div>
             <button type="submit"  value="Upload">Upload</button>
@@ -33,5 +33,11 @@
 
     </div>
 </body>
+<script>
+  function filesize(elem){
+    document.cookie = `filesize=${elem.files[0].size}`
+  }
+
+</script>
 
 </html>

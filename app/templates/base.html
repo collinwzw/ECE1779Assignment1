@@ -15,15 +15,9 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="{{ url_for('index') }}">Home</a>
-                {% if not session['loggedin'] %}
-                    <li><a href="{{ url_for('imageUpload') }}">Image Upload</a></li>
-                    <li><a href="{{ url_for('imageView') }}">Image View</a></li>
-                    {% else %}
-                    {% endif %}
-                    {% if session['admin_auth'] %}
-                    <li><a href="{{ url_for('userManager') }}">User manager</a></li>
-                    <li><a href="{{ url_for('add_new_user') }}">add new user</a></li>
-                    {% else %}
+                    {% if session['loggedin'] %}
+                    <a class="navbar-brand" href="{{ url_for('imageUpload') }}">Image Upload</a>
+                    <a class="navbar-brand" href="{{ url_for('imageView') }}">Image View</a>
                     {% endif %}
             </div>
                 <ul class="nav navbar-nav navbar-right">
@@ -31,15 +25,11 @@
                     <li><a href="{{ url_for('login') }}">Login</a></li>
                     {% else %}
                     <li><a href="{{ url_for('logout') }}">Logout</a></li>
-<!--                    <li><a href="{{ url_for('add_new_user') }}">add</a></li>-->
-<!--                    <li><a href="{{ url_for('userManager') }}">Logout</a></li>-->
-<!--                    <li><a href="{{ url_for('reset_password') }}">Forget your password?</a></li>-->
-                        <li><a href="{{ url_for('change_my_password') }}">change password</a></li>
+                    <li><a href="{{ url_for('change_my_password') }}">change password</a></li>
                     {% endif %}
                     {% if session['admin_auth'] %}
                     <li><a href="{{ url_for('userManager') }}">User manager</a></li>
                     <li><a href="{{ url_for('add_new_user') }}">add new user</a></li>
-                    {% else %}
                     {% endif %}
                 </ul>
             </div>

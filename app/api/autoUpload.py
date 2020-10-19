@@ -14,8 +14,7 @@ from FaceMaskDetection.pytorch_infer import inference
 from FaceMaskDetection.utils import anchor_decode,anchor_generator
 
 
-app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG"]
-app.config['MAX_IMAGE_FILESIZE'] =  100000
+
 
 def connect_to_database():
     return mysql.connector.connect(user=db_config['user'],

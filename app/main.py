@@ -106,12 +106,10 @@ def index():
 @app.route('/home')
 def home():
     # Check if user is admin
-    if session.get('admin_auth'):
+    if "loggedin" in session:
         # User is loggedin show them the homeadmin page
-        return render_template('homeadmin.html', username=session['username'])
+        return render_template('home.html', username=session['username'],auth=session['admin_auth'])
     # User is not loggedin redirect to login page
-    elif "loggedin" in session:
-        return render_template("home.html",username=session)
     else:
         return redirect(url_for('login'))
 

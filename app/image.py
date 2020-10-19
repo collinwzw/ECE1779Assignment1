@@ -8,7 +8,7 @@ import requests
 from FaceMaskDetection.pytorch_infer import inference
 
 app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG","JPG","PNG"]
-app.config['MAX_IMAGE_FILESIZE'] =  1024*1024
+app.config['MAX_IMAGE_FILESIZE'] =  10000
 
 def getNumberOfFilesInDatabase():
     '''
@@ -74,9 +74,9 @@ def imageView():
         db = get_db()
         cursor = db.cursor(dictionary=True)
         try:
-            db.start_transaction()
-            query = '''SELECT * FROM images WHERE username = %s for update'''
-            cursor.execute(query, (session['username'],))
+            #db.start_transaction()
+            query = '''SELECT * FROM images WHERE id = %s'''
+            cursor.execute(query, (session['id'],))
         except:
             e = sys.exc_info()
             db.rollback()
@@ -145,7 +145,7 @@ def imageUpload():
                         try:
                             #db.start_transaction()
                             query ='''insert into images values (%s,%s,%s,%s)'''
-                            cursor.execute(query, (session['username'],finafilename, numberofFaces,numberofMasks, ))
+                            cursor.execute(query, (session['id'],finafilename, numberofFaces,numberofMasks, ))
                             db.commit()
                             processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
                             cv2.imwrite(processedSavePath, cv2.cvtColor(processedImage, cv2.COLOR_RGB2BGR))
@@ -188,7 +188,7 @@ def imageUpload():
                 try:
                     #db.start_transaction()
                     query ='''insert into images values (%s,%s,%s,%s)'''
-                    cursor.execute(query, (session['username'],finafilename, numberofFaces,numberofMasks, ))
+                    cursor.execute(query, (session['id'],finafilename, numberofFaces,numberofMasks, ))
                     db.commit()
                     processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
                     cv2.imwrite(processedSavePath, cv2.cvtColor(processedImage, cv2.COLOR_RGB2BGR))
@@ -204,18 +204,6 @@ def imageUpload():
                 return render_template("imageUpload.html", message='No file or url selected')
         return render_template("imageUpload.html",message = "please select image")
     return redirect(url_for('login'))
-
-@app.route('/imageDelete/<filename>', methods=['POST'])
-# Delete an object from a bucket
-def imageDelete(filename):
-    db = get_db()
-    cursor = db.cursor(dictionary=True)
-    query = '''DELETE FROM images WHERE filename=%s'''
-    cursor.execute(query, (filename,))
-    db.commit()
-    savePath = os.path.join(app.config["IMAGE_PROCESSED"], filename)
-    os.remove(savePath)
-    return redirect(url_for('imageView',message=""))
 
 def faceMaskDetection(readFilePath):
     '''

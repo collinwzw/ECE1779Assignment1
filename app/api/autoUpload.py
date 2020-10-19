@@ -14,7 +14,7 @@ from werkzeug.security import generate_password_hash,check_password_hash
 from FaceMaskDetection.pytorch_infer import inference
 from FaceMaskDetection.utils import anchor_decode,anchor_generator
 
-
+#app.config['MAX_CONTENT_LENGTH'] = 0.01 * 1024 * 1024
 
 
 def connect_to_database():

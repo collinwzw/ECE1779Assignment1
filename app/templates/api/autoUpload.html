@@ -5,10 +5,10 @@
     <title>API auto upload</title>
 </head>
 <body>
-    <div class="autoUpload">
+    <div>
         <h1>Upload</h1>
 
-        <form id = "login" action="{{url_for('api.uploadResponse')}}" method="post" autocomplete="off" enctype="multipart/form-data">
+        <form action="{{url_for('api.upload')}}" enctype="multipart/form-data" method="post" autocomplete="off">
             <div>
                 <label for="username"></label>
                 Username <input type="text" name="username" id="username" required>
@@ -17,14 +17,12 @@
                 <label for="password"></label>
                 Password <input type="password" name="password" id="password" required>
             </div>
-
-
-            <div class="form-group">
+            <div >
                 <label>Photo to upload</label>
-                <input type="file" class="custom-file-input" name="image" id="image" oninput="filesize(this);">
+                <input type="file" class="custom-file-input" name="image" id="image">
 
             </div>
-            <button type="submit"  value="Submit">Submit</button>
+            <button type="submit"  value="Upload">Upload</button>
             <button type="reset" value="Reset">Reset</button>
 
         </form>
@@ -35,10 +33,5 @@
 
     </div>
 </body>
-<script>
-  function filesize(elem){
-    document.cookie = `filesize=${elem.files[0].size}`
-  }
 
-</script>
 </html>

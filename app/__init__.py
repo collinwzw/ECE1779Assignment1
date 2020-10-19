@@ -10,7 +10,7 @@ app.config.update(dict(
     MAIL_USE_TLS = False,
     MAIL_USE_SSL = True,
     MAIL_USERNAME = 'ece1779group@gmail.com',
-    MAIL_PASSWORD = 'ikztppjrmazekwly'
+    MAIL_PASSWORD = 'Toronto1779'
 ))
 mail = Mail(app)
 bootstrap = Bootstrap(app)

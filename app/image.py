@@ -1,3 +1,5 @@
+import random
+import string
 from app import app
 from flask import render_template, g, request, session, redirect, url_for, send_from_directory, send_file
 from app.main import get_db
@@ -10,18 +12,22 @@ from FaceMaskDetection.pytorch_infer import inference
 app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG","JPG","PNG"]
 app.config['MAX_IMAGE_FILESIZE'] = 1024*1024
 
-def getNumberOfFilesInDatabase():
+def generate_filename():
     '''
-    method to get total number of files have been saved in the database
+    method to get filename that have not been saved in the database
     :return: integer that store number of files stored in database
     '''
-    db = get_db()
-    cursor = db.cursor()
-    query = '''select count(*) from images'''
-    cursor.execute(query)
-    numberOfFiles = cursor.fetchall()
-    return numberOfFiles[0][0]
-
+    while 1:
+        chars = string.ascii_letters + string.digits
+        key = random.sample(chars, 10)
+        keys = "".join(key)
+        db = get_db()
+        cursor = db.cursor()
+        query = '''SELECT * FROM images WHERE filename = %s'''
+        cursor.execute(query, (keys,))
+        file = cursor.fetchone()
+        if not file:
+            return keys
 
 def allowedImageType(filename):
     '''
@@ -138,8 +144,8 @@ def imageUpload():
                                                    message="Image could not be processed correctly" + str(e))
                         numberofFaces = len(output_info)
                         numberofMasks = NumberOfMask(output_info)
-                        numberOfFileInDatabase = getNumberOfFilesInDatabase()
-                        finafilename = 'processed' + str(numberOfFileInDatabase) + '.' + filename.rsplit(".",1)[1]
+                        finafilename = generate_filename()
+                        finafilename =  finafilename + '.' + filename.rsplit(".",1)[1]
                         db = get_db()
                         cursor = db.cursor(dictionary=True)
                         try:
@@ -181,8 +187,8 @@ def imageUpload():
                     return render_template("imageUpload.html", message="Image could not be processed correctly" + str(e))
                 numberofFaces = len(output_info)
                 numberofMasks = NumberOfMask(output_info)
-                numberOfFileInDatabase = getNumberOfFilesInDatabase()
-                finafilename = 'processed' + str(numberOfFileInDatabase) + '.' + filename.rsplit(".",1)[1]
+                finafilename = generate_filename()
+                finafilename = finafilename + '.' + filename.rsplit(".", 1)[1]
                 db = get_db()
                 cursor = db.cursor(dictionary=True)
                 try:

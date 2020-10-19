@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.21, for macos10.15 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.21, for Linux (x86_64)
 --
 -- Host: localhost    Database: ece1779a1
 -- ------------------------------------------------------
--- Server version	8.0.21
+-- Server version	8.0.21-0ubuntu0.20.04.4
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,47 +16,14 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `accounts`
---
-
-DROP TABLE IF EXISTS `accounts`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `accounts` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(50) NOT NULL,
-  `password_hash` varchar(255) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `admin_auth` tinyint(1) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10034 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping data for table `accounts`
 --
 
 LOCK TABLES `accounts` WRITE;
 /*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
-INSERT INTO `accounts` VALUES (10031,'test','pbkdf2:sha256:150000$7NLok2RU$c75d3231ba4b10760acb25df9f6eebaeea05db58b6dff934b2f0b856f02a5a4e','123@11233.com',1),(10032,'test2','pbkdf2:sha256:150000$7NLok2RU$c75d3231ba4b10760acb25df9f6eebaeea05db58b6dff934b2f0b856f02a5a4e','testt1@ffewa.com',0),(10033,'test1f','pbkdf2:sha256:150000$A2WVT8rV$f91c50b5d3684e4cab005ad5fca930245b108a79b8fe6b3d09ad6d662aa3a3bd','test13@test.com',0);
+INSERT INTO `accounts` VALUES (10040,'testAdmin','pbkdf2:sha256:150000$1GoAqR3v$901b4647b4ddff74e1275059f8a549787e1311b620963e35b3449733123fee15','testAdmin@mail.com',1),(10041,'testNormal','pbkdf2:sha256:150000$Q5tpDKdc$98c853387d60e59a681261304379d36bf55bd8c1d753ebf6c784c05d4780ef5f','testNormal@mail.com',0);
 /*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `images`
---
-
-DROP TABLE IF EXISTS `images`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `images` (
-  `id` int NOT NULL,
-  `filename` varchar(20) NOT NULL,
-  `numberofFaces` int DEFAULT NULL,
-  `numberofMasks` int DEFAULT NULL,
-  PRIMARY KEY (`filename`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `images`
@@ -76,4 +43,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-10-19  1:49:29
+-- Dump completed on 2020-10-19 17:26:03

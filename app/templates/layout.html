@@ -1,15 +1,35 @@
-{% extends "base.html" %}
-{% import 'bootstrap/wtf.html' as wtf %}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>{% block title %}{% endblock %}</title>
+	</head>
 
-{% block app_content %}
+	<body class="loggedin">
+		<nav class="navtop">
+			<div>
+				<h1>Mask Detection Website</h1>
 
-               {% block content %}{% endblock %}
+                <a href="{{ url_for('home') }}"></i>Home</a>
+				{% if session['admin_auth'] %}
+				<a href="{{ url_for('userManager') }}">User manager</a>
+				<a href="{{ url_for('add_new_user') }}">add new user</a>
+				{% endif %}
+				<a href="{{ url_for('imageView') }}"></i>ImageList</a>
+				<a href="{{ url_for('imageUpload') }}"></i>Upload</a>
+				<a href="{{ url_for('logout') }}"></i>Logout</a>
+			</div>
+		</nav>
+		<hr>
+<!--		<div class="content">-->
+			{% block content %}{% endblock %}
 
+<!--		</div>-->
+	</body>
 <script>
   function filesize(elem){
     document.cookie = `filesize=${elem.files[0].size}`
   }
 
 </script>
-
-{% endblock %}
+</html>

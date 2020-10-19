@@ -6,7 +6,6 @@ db_config = {'user': 'root',
              'database': 'ece1779a1'}
 
 
-
 sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection')
 sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection/models')
 sys.path.insert(1, '/home/ubuntu/Desktop/ECE1779Assignment1/FaceMaskDetection/load_model')

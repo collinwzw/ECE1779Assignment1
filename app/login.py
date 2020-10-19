@@ -153,7 +153,7 @@ def change_my_password():
                 return redirect(url_for('change_my_password'))
         else:
             flash('Invalid username or password')
-            return redirect(url_for('change-my-password'))
+            return redirect(url_for('change_my_password'))
     else:
         return render_template('changemypassword.html', form=form)
 

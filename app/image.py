@@ -10,7 +10,7 @@ import requests
 from FaceMaskDetection.pytorch_infer import inference
 
 app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG","JPG","PNG"]
-app.config['MAX_IMAGE_FILESIZE'] = 1024*1024
+app.config['MAX_IMAGE_FILESIZE'] = 512*512
 
 def generate_filename():
     '''

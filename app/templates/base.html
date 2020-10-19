@@ -15,6 +15,16 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="{{ url_for('index') }}">Home</a>
+                {% if not session['loggedin'] %}
+                    <li><a href="{{ url_for('imageUpload') }}">Image Upload</a></li>
+                    <li><a href="{{ url_for('imageView') }}">Image View</a></li>
+                    {% else %}
+                    {% endif %}
+                    {% if session['admin_auth'] %}
+                    <li><a href="{{ url_for('userManager') }}">User manager</a></li>
+                    <li><a href="{{ url_for('add_new_user') }}">add new user</a></li>
+                    {% else %}
+                    {% endif %}
             </div>
                 <ul class="nav navbar-nav navbar-right">
                     {% if not session['loggedin'] %}

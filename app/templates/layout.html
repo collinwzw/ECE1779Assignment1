@@ -3,15 +3,6 @@
 
 {% block app_content %}
 
-                <a href="{{ url_for('home') }}"></i>Home</a>
-				{% if session['admin_auth'] %}
-				<a href="{{ url_for('userManager') }}">User manager</a>
-				<a href="{{ url_for('add_new_user') }}">add new user</a>
-				{% endif %}
-				<a href="{{ url_for('imageView') }}"></i>ImageList</a>
-				<a href="{{ url_for('imageUpload') }}"></i>Upload</a>
-				<a href="{{ url_for('logout') }}"></i>Logout</a>
-
                {% block content %}{% endblock %}
 
 <script>

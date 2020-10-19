@@ -31,7 +31,7 @@ def register():
     '''
     if request.method == 'GET':
         return render_template('api/autoRegister.html')
-    msg = ''
+
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         # Create variables for easy access
         username = request.form['username']

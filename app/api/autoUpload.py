@@ -148,12 +148,6 @@ def upload():
                             "num_masked": numberofMasks,
                             "num_unmasked": numberofFaces-numberofMasks}})
 
-                        #except Exception as e:
-                            #msg = "Image is too large!" + str(e)
-                            #return api_error_response(413, msg)
-
-
-
             else:
                 # Account doesnt exist or username/password incorrect
                 msg = 'Incorrect username/password!'

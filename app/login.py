@@ -6,7 +6,7 @@ from app.main import get_db
 from flask_mail import Message
 from app.form import LoginForm,ChangePassword, ResetPassword, AddUserForm
 from werkzeug.security import generate_password_hash,check_password_hash
-from app import bootstrap
+
 
 
 def send_email(subject, sender, recipients, text_body):
@@ -30,15 +30,6 @@ def send_password_reset_email(email, new_password):
                sender='ece1779group@gmail.com',
                recipients=[email],
                text_body=render_template('email.txt', newpsw=new_password))
-
-
-# def is_admin(username):
-#     db = get_db()
-#     cursor = db.cursor(dictionary=True)
-#     query = "SELECT count(1) FROM accounts WHERE username = %s and admin_auth = 1"
-#     cursor.execute(query, (username,))
-#     auth = cursor.fetchone()
-#     return bool(auth)
 
 
 def delete_user(id):

@@ -4,6 +4,7 @@ import mysql.connector
 from app.config import db_config
 import re
 from app.api.errors import error_response as api_error_response
+from werkzeug.security import generate_password_hash, check_password_hash
 def connect_to_database():
     return mysql.connector.connect(user=db_config['user'],
                                    password=db_config['password'],
@@ -36,7 +37,7 @@ def register():
         # Create variables for easy access
         username = request.form['username']
         password = request.form['password']
-
+        password_hash = generate_password_hash(password)
         cnx = get_db()
         cursor = cnx.cursor()
         query = '''SELECT * FROM accounts WHERE username = %s '''
@@ -54,6 +55,9 @@ def register():
             msg = 'Please fill out the form!'
             return api_error_response(400, msg)
         else:
+            cursor.execute("Insert into accounts (username, password_hash, email,admin_auth) "
+                           "values (%s, %s, %s, %s)", (username, password_hash, "Null", False))
+            cnx.commit()
             return jsonify({"success": True})
     elif request.method == 'POST':
         # Form is empty... (no POST data)

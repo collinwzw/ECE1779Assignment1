@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, Email, EqualTo,Length
+from wtforms.validators import DataRequired, Email, EqualTo,Length;
 
 
 class AddUserForm(FlaskForm):
@@ -14,7 +14,7 @@ class AddUserForm(FlaskForm):
                                                       Length(max=25,min=5,message='Password length should between 5~25')])
     password2 = PasswordField('Please Repeat Password',
                               validators=[DataRequired(),
-                                          EqualTo(password1,message='Your password and repeat password do not match')])
+                                          EqualTo("password1",message='Your password and repeat password do not match')])
     admin_auth = BooleanField('Admin')
     submit = SubmitField('Add a new User')
 
@@ -36,11 +36,11 @@ class ChangePassword(FlaskForm):
     password = PasswordField('Old Password', validators=[DataRequired(message='Empty Password'),
                                                          Length(max=25, min=5,message='Password length should between 5~25')])
     password1 = PasswordField('New Password',validators=[DataRequired(message='Not Allowed Empty Password'),
-                                                         Length(max=25, min=5,message='Password length should between 5~25'),
-                                                         not EqualTo(password)])
+                                                         Length(max=25, min=5 ,message='Password length should between 5~25'),
+                                                         ])
     password2 = PasswordField('Please Repeat Password',
                               validators=[DataRequired(),
-                                          EqualTo(password1, message='Your password and repeat password do not match')])
+                                          EqualTo('password1', message='Your password and repeat password do not match')])
     submit = SubmitField('Reset your Password')
 
 

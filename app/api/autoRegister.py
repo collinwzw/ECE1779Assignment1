@@ -1,10 +1,12 @@
 from app.api import bp
-from flask import Flask, request, jsonify, render_template,g
+from flask import request, jsonify, render_template,g
 import mysql.connector
-from app.config import db_config
+from app.imageManager.config import db_config
 import re
 from app.api.errors import error_response as api_error_response
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
+
+
 def connect_to_database():
     return mysql.connector.connect(user=db_config['user'],
                                    password=db_config['password'],

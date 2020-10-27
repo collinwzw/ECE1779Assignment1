@@ -1,18 +1,15 @@
-import requests
 from app.api import bp
 from app import app
-from flask import Flask, request, jsonify, render_template,session,g, redirect
+from flask import request, jsonify, render_template,session,g
 import mysql.connector
-from app.config import db_config
+from app.imageManager.config import db_config
 from app.api.errors import error_response as api_error_response
 import cv2
-import os, sys
+import os
 from werkzeug.utils import secure_filename
-from werkzeug.exceptions import RequestEntityTooLarge
-from werkzeug.security import generate_password_hash,check_password_hash
+from werkzeug.security import check_password_hash
 
 from FaceMaskDetection.pytorch_infer import inference
-from FaceMaskDetection.utils import anchor_decode,anchor_generator
 
 app.config['MAX_CONTENT_LENGTH'] =  1024 * 1024
 

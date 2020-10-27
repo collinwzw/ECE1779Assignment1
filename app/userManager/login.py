@@ -1,18 +1,14 @@
 from app import app, mail
 import random
 import string
-from flask import render_template, g, request, session, redirect, url_for, flash
+from flask import render_template, request, session, redirect, url_for, flash
 from app.main import get_db
 from flask_mail import Message
-from app.form import LoginForm, ChangePassword, ResetPassword, AddUserForm
+from app.loginManager.form import LoginForm, ChangePassword, ResetPassword, AddUserForm
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-def send_email(subject, sender, recipients, text_body):
-    """method send_mail is using the model Mail in Flask-Mail to send a E-mail """
-    msg = Message(subject, sender=sender, recipients=recipients)
-    msg.body = text_body
-    mail.send(msg)
+
 
 
 def generate_password():

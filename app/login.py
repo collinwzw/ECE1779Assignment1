@@ -52,6 +52,7 @@ def login():
     If no, it will show the login page and let user input username and password.
     Once user submit the username and password, it will go to dababase and verify them.
     If login success, user id, username, admin_auth will be save in session
+    account: assert if username is in database.
     """
     form = LoginForm()
     if request.method == "GET":
@@ -98,7 +99,9 @@ def logout():
 @app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
     """Controller that display the reset_password page. Only user_email is needed to be input.
-    Controller will validate the email in database and try to """
+    Controller will validate the email in database and generate a new password 10-lenght-random string.
+    Then it will try to send a email with new password to user's mailbox by gmail.
+    Email template is email.txt"""
     form = ResetPassword()
     if form.validate_on_submit():
         user_email = form.email.data
@@ -127,6 +130,10 @@ def reset_password():
 
 @app.route('/change_my_password', methods=['POST', 'GET'])
 def change_my_password():
+    """Controller is allow user to change their password if they have valid username and password.
+    It will generate the new password hash and write into the database.
+    If username not exist, or wrong password, controller will not allow user change password.
+     """
     form = ChangePassword()
     if request.method == 'GET':
         return render_template('changemypassword.html', form=form)
@@ -160,6 +167,10 @@ def change_my_password():
 
 @app.route('/admin/adduser', methods=['GET', 'POST'])
 def add_new_user():
+    """controller will allow admin user to add new user.
+    It will assert if user is admin by admin_auth. if it is normal user, it will redirect to login page
+    When admin add new user, if same username or email in database, it will refuse to create new user
+    Admin also allow to create another admin by input admin_auth True"""
     if session.get('admin_auth'):
         form = AddUserForm()
         if form.validate_on_submit():
@@ -193,6 +204,10 @@ def add_new_user():
 
 @app.route('/admin/usermanager', methods=['GET', 'POST'])
 def userManager():
+    """Controller allows admin user to review all users in system.
+    Controller will go to database and show all users by user_table:(id ,username ,email)
+    Botton on the html will allow admin to delete users.
+    """
     if session.get('admin_auth'):
         db = get_db()
         cursor = db.cursor(dictionary=True)
@@ -206,6 +221,9 @@ def userManager():
 
 @app.route('/admin/usermanager/deleteuser/<int:id>', methods=['GET'])
 def deleteuser(id):
+    """Controller allows admin to delect users
+    Controller get the user's id by GET method <int:id>
+    Controller will access to database and delete the row of user by using delete_user(id)"""
     if session.get('admin_auth'):
         delete_user(id)
         db = get_db()

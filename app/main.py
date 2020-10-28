@@ -6,6 +6,7 @@ import re
 
 
 def connect_to_database():
+    #Connect database
     return mysql.connector.connect(user=db_config['user'],
                                    password=db_config['password'],
                                    host=db_config['host'],
@@ -13,6 +14,7 @@ def connect_to_database():
 
 
 def get_db():
+    #access to database
     db = getattr(g, '_database', None)
     if db is None:
         db = g._database = connect_to_database()
@@ -20,6 +22,7 @@ def get_db():
 
 
 def teardown_db(exception):
+    #close the database
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
@@ -28,6 +31,8 @@ def teardown_db(exception):
 @app.route('/') 
 @app.route('/index')
 def index():
+    """Controller will assert user status, if user is already login, it will redirect to /home,
+    else Controller will return the mail.html"""
     if 'loggedin' in session:
         # User is loggedin show them the home page
         return redirect('home')

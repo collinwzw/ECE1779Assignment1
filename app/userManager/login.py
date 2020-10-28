@@ -1,43 +1,10 @@
-from app import app, mail
-import random
-import string
+from app import app
 from flask import render_template, request, session, redirect, url_for, flash
-from app.main import get_db
+from app.database.dbManager import get_db
 from flask_mail import Message
-from app.loginManager.form import LoginForm, ChangePassword, ResetPassword, AddUserForm
+from app.userManager.form import LoginForm, ChangePassword, ResetPassword, AddUserForm
 from werkzeug.security import generate_password_hash, check_password_hash
-
-
-
-
-
-def generate_password():
-    """method generate password will random a 10-length-string with numbers and letters,
-    it will be used in reset_password function.
-    """
-    chars = string.ascii_letters + string.digits
-    key = random.sample(chars, 10)
-    keys = "".join(key)
-    return keys
-
-
-def send_password_reset_email(email, new_password):
-    """method send_password_reset_email is used in reset_password function, it will get a new_password and
-    put it in the body of Email. It uses a template email.txt to format the email body"""
-    send_email('[No reply] Your New Password',
-               sender='ece1779group@gmail.com',
-               recipients=[email],
-               text_body=render_template('email.txt', newpsw=new_password))
-
-
-def delete_user(userid):
-    """method delete user is to access to the database and find userid and delete this row"""
-    db = get_db()
-    cursor = db.cursor(dictionary=True)
-    query = "Delete from accounts WHERE id = %s"
-    cursor.execute(query, (userid,))
-    commit = "commit"
-    cursor.execute(commit)
+from app.database.dbManager import update_data, insert_data, delete_data
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -221,7 +188,7 @@ def deleteuser(id):
     Controller get the user's id by GET method <int:id>
     Controller will access to database and delete the row of user by using delete_user(id)"""
     if session.get('admin_auth'):
-        delete_user(id)
+        delete_data('account', 'id', id)
         db = get_db()
         cursor = db.cursor(dictionary=True)
         cursor.execute('Select id, username, email from accounts')

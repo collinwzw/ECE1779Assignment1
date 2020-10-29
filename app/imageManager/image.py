@@ -2,7 +2,6 @@ import random
 import string
 from app import app
 from flask import render_template, g, request, session, redirect, url_for, send_from_directory, send_file
-from app.main import get_db
 import cv2
 import os, sys
 from werkzeug.utils import secure_filename

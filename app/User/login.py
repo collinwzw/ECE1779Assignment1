@@ -1,11 +1,10 @@
 from app import app
 from flask import render_template, request, session, redirect, url_for, flash
-from app.database.dbManager import get_db
+from app.database.dbManager import  dbManager
 from flask_mail import Message
-from app.userManager.form import LoginForm, ChangePassword, ResetPassword, AddUserForm
+from app.User.form import LoginForm, ChangePassword, ResetPassword, AddUserForm
 from werkzeug.security import generate_password_hash, check_password_hash
-from app.database.dbManager import update_data, insert_data, delete_data
-
+from app.User.LoginSystem import LoginSystem
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -19,31 +18,23 @@ def login():
     """
     form = LoginForm()
     if request.method == "GET":
-        return render_template('login.html', title='Sign In', form=form)
+        return render_template('userManager/login.html', title='Sign In', form=form)
     if request.method == "POST":
         if 'loggedin' in session:
             return redirect(url_for('home'))
         if form.validate_on_submit():
             username = form.username.data
             password = form.password.data
-            db = get_db()
-            cursor = db.cursor(dictionary=True)
-            query = "SELECT * FROM accounts WHERE username = %s"
-            cursor.execute(query, (username,))
-            account = cursor.fetchone()
-            if account:
-                if check_password_hash(str(account['password_hash']), password):
-                    session['loggedin'] = True
-                    session['id'] = account['id']
-                    session['username'] = account['username']
-                    session['admin_auth'] = bool(account['admin_auth'])
-                    flash('Login successfully!')
-                    return redirect(url_for('home'))
-                else:
-                    flash('Invalid username or password')
-                    return redirect(url_for('login'))
-            flash('Invalid username or password')
-            return redirect(url_for('login'))
+            loginsystem = LoginSystem.getInstance()
+            user = loginsystem.verifyLogin(username,password)
+            session['id'] = user['id']
+            if user:
+                flash('Login successfully!')
+                return redirect(url_for('home'))
+            else:
+                flash('Invalid username or password')
+                return redirect(url_for('login'))
+
         else:
             return redirect(url_for('login'))
 

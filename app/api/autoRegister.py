@@ -1,7 +1,7 @@
 from app.api import bp
 from flask import request, jsonify, render_template,g
 import mysql.connector
-from app.imageManager.config import db_config
+from app.database import db_config
 import re
 from app.api.errors import error_response as api_error_response
 from werkzeug.security import generate_password_hash

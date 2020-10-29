@@ -2,7 +2,7 @@ from app.api import bp
 from app import app
 from flask import request, jsonify, render_template,session,g
 import mysql.connector
-from app.imageManager.config import db_config
+from app.database import db_config
 from app.api.errors import error_response as api_error_response
 import cv2
 import os

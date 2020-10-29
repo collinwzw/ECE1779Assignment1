@@ -9,9 +9,16 @@ app.secret_key = 'ece1779a1'
 
 
 from app import main
-from app.imageManager import image, config
-
+from app import config
+from app.imageManager import image
+from app.User.User import User
+from app.User import login
 from app.api import bp as api_bp
+
+
+
 app.register_blueprint(api_bp, url_prefix='/api')
 
-app.run('0.0.0.0',5000,debug=False)
+
+
+app.run('0.0.0.0',5000,debug=True)

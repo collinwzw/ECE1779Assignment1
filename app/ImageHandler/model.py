@@ -46,6 +46,19 @@ class ImageHandler:
             return True
 
     @staticmethod
+    def processImage(filename):
+        try:
+            output_info, processedImage = ImageHandler.faceMaskDetection(filename)
+        except:
+            e = sys.exc_info()
+            return render_template("imageManager/imageUpload.html",
+                                   message="Image could not be processed correctly" + str(e))
+        numberofFaces = len(output_info)
+        numberofMasks = ImageHandler.NumberOfMask(output_info)
+        finafilename = ImageHandler.generate_filename()
+        finafilename = finafilename + '.' + filename.rsplit(".", 1)[1]
+        return numberofFaces, numberofMasks, finafilename, processedImage
+    @staticmethod
     def allowedImageFilesize(filesize):
         '''
         method to check the filesize of the image uploaded by user

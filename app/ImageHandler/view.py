@@ -82,16 +82,9 @@ def imageUpload():
                         filename = secure_filename(image.filename)
                         savePath = os.path.join(app.config["IMAGE_UPLOADS"], image.filename)
                         image.save(savePath)
-                        try:
-                            output_info, processedImage = ImageHandler.faceMaskDetection(savePath)
-                        except:
-                            e = sys.exc_info()
-                            return render_template("imageManager/imageUpload.html",
-                                                   message="Image could not be processed correctly" + str(e))
-                        numberofFaces = len(output_info)
-                        numberofMasks = ImageHandler.NumberOfMask(output_info)
-                        finafilename = ImageHandler.generate_filename()
-                        finafilename = finafilename + '.' + filename.rsplit(".", 1)[1]
+
+                        numberofFaces, numberofMasks, finafilename, processedImage = ImageHandler.processImage(savePath)
+
                         dbm = dbManager();
                         dbm.insert_data_image(session['id'],finafilename,numberofFaces,numberofMasks,"imageManager/imageUpload.html")
                         processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
@@ -117,16 +110,7 @@ def imageUpload():
                     e = sys.exc_info()
                     return render_template("imageManager/imageUpload.html",
                                            message="Image could not be downloaded from url. Error: " + str(e))
-                try:
-                    output_info, processedImage = ImageHandler.faceMaskDetection(filename)
-                except:
-                    e = sys.exc_info()
-                    return render_template("imageManager/imageUpload.html",
-                                           message="Image could not be processed correctly" + str(e))
-                numberofFaces = len(output_info)
-                numberofMasks = ImageHandler.NumberOfMask(output_info)
-                finafilename = ImageHandler.generate_filename()
-                finafilename = finafilename + '.' + filename.rsplit(".", 1)[1]
+                numberofFaces, numberofMasks, finafilename, processedImage = ImageHandler.processImage(filename)
                 dbm = dbManager();
                 dbm.insert_data_image(session['id'], finafilename, numberofFaces, numberofMasks,
                                       "imageManager/imageUpload.html")

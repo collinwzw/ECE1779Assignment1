@@ -27,7 +27,10 @@ def login():
             password = form.password.data
             loginsystem = LoginSystem.getInstance()
             user = loginsystem.verifyLogin(username,password)
+            session['loggedin'] = True
             session['id'] = user['id']
+            session['username'] = user['username']
+            session['admin_auth'] = bool(user['admin_auth'])
             if user:
                 flash('Login successfully!')
                 return redirect(url_for('home'))

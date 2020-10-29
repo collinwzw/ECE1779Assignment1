@@ -58,13 +58,16 @@ class dbManager:
         self.teardown_db()
 
 
-    def search_data(self, table, target_key, condition ):
+    def search_data(self, table, target_key, condition, singleResult = True ):
         '''method search data in SQL with target condition'''
         db = self.get_db()
         cursor = db.cursor(dictionary=True)
         query ="SELECT * FROM " + table + " WHERE " + target_key + " = %s "
         cursor.execute(query, (condition,))
-        result = cursor.fetchone()
+        if singleResult:
+            result = cursor.fetchone()
+        else:
+            result = cursor.fetchall()
         return result
 
 
@@ -76,5 +79,18 @@ class dbManager:
         cursor.execute(query, (table, row1, row2, row3, row4, value1, value2, value3, value4))
         cursor.execute("commit")
 
+    def insert_data_image(self, value1, value2, value3, value4, returnHTML):
+        '''method insert data into table of SQL'''
 
+        db = self.get_db()
+        cursor = db.cursor(dictionary=True)
+        try:
+            query = "Insert into images  values (%s, %s, %s, %s)"
+            cursor.execute(query, ( value1, value2, value3, value4))
+            cursor.execute("commit")
+        except:
+            e = sys.exc_info()
+            db.rollback()
+            self.teardown_db(e)
+            return render_template(returnHTML, message="database error: " + str(e))
 

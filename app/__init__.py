@@ -12,7 +12,7 @@ from app import main
 from app import config
 from app.ImageHandler import view
 
-from app.User import login
+from app.User import view
 from app.api import bp as api_bp
 
 

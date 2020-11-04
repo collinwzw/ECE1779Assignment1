@@ -4,7 +4,9 @@ from app.database.dbManager import  dbManager
 from flask_mail import Message
 from app.User.form import LoginForm, ChangePassword, ResetPassword, AddUserForm
 from werkzeug.security import generate_password_hash, check_password_hash
-from app.User.LoginSystem import LoginSystem
+from app.User.model import LoginSystem
+from app.User.email import send_password_reset_email
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -27,11 +29,8 @@ def login():
             password = form.password.data
             loginsystem = LoginSystem.getInstance()
             user = loginsystem.verifyLogin(username,password)
-            session['loggedin'] = True
-            session['id'] = user['id']
-            session['username'] = user['username']
-            session['admin_auth'] = bool(user['admin_auth'])
             if user:
+                LoginSystem.login_user(user)
                 flash('Login successfully!')
                 return redirect(url_for('home'))
             else:
@@ -44,12 +43,8 @@ def login():
 
 @app.route('/logout')
 def logout():
+    LoginSystem.logout_user()
     """Controller pop the login status and user information in session, then redirect to index page"""
-    session.pop('loggedin', None)
-    session.pop('id', None)
-    session.pop('username', None)
-    session.pop('message', None)
-    session.pop('admin_auth', None)
     return redirect(url_for('index'))
 
 
@@ -60,21 +55,14 @@ def reset_password():
     Then it will try to send a email with new password to user's mailbox by gmail.
     Email template is email.txt"""
     form = ResetPassword()
+    database = dbManager()
     if form.validate_on_submit():
         user_email = form.email.data
-        db = get_db()
-        cursor = db.cursor(dictionary=True)
-        query = "SELECT * FROM accounts WHERE email= %s"
-        cursor.execute(query, (user_email,))
-        mail_exist = cursor.fetchone()
+        mail_exist = database.search_data("any","accounts","email",user_email)
         if mail_exist:
-            new_password = generate_password()
+            new_password = LoginSystem.generate_password()
             new_password_hash = generate_password_hash(new_password)
-            db = get_db()
-            cursor = db.cursor(dictionary=True)
-            query = "update accounts set password_hash= %s WHERE email= %s"
-            cursor.execute(query, (new_password_hash, user_email))
-            cursor.execute("commit")
+            database.update_data("any","accounts", "password_hash", new_password_hash, "email", user_email, "error.html")
             flash('Your new password has been sent to your mailbox')
             redirect('login')
             send_password_reset_email(user_email, new_password)
@@ -98,18 +86,10 @@ def change_my_password():
         username = form.username.data
         old_password = form.password.data
         new_password_hash = generate_password_hash(form.password1.data)
-        db = get_db()
-        cursor = db.cursor(dictionary=True)
-        query = "SELECT * FROM accounts WHERE username = %s"
-        cursor.execute(query, (username,))
-        account = cursor.fetchone()
+        account=dbManager.search_data("any","account","username",username)
         if account:
             if check_password_hash(str(account['password_hash']), old_password):
-                db = get_db()
-                cursor = db.cursor(dictionary=True)
-                query = "update accounts set password_hash= %s WHERE username= %s"
-                cursor.execute(query, (new_password_hash, username))
-                cursor.execute("commit")
+                dbManager.update_data("any","accounts","password_hash",new_password_hash,"username",username,"error.html")
                 flash('Your password has been changed')
                 return redirect(url_for('login'))
             else:
@@ -135,7 +115,7 @@ def add_new_user():
             password_hash = generate_password_hash(form.password1.data)
             email = form.email.data
             admin_auth = form.admin_auth.data
-            db = get_db()
+            db = dbManager.get_db()
             cursor = db.cursor(dictionary=True)
             query = "SELECT * FROM accounts WHERE username = %s or email = %s"
             cursor.execute(query, (username, email))
@@ -144,7 +124,7 @@ def add_new_user():
                 flash('This User name or Email is existing')
                 return redirect(url_for('add_new_user'))
             else:
-                db = get_db()
+                db = dbManager.get_db()
                 cursor = db.cursor(dictionary=True)
                 cursor.execute("Insert into accounts (username, password_hash, email,admin_auth) "
                                "values (%s, %s, %s, %s)", (username, password_hash, email, admin_auth))
@@ -166,7 +146,7 @@ def userManager():
     Botton on the html will allow admin to delete users.
     """
     if session.get('admin_auth'):
-        db = get_db()
+        db = dbManager.get_db()
         cursor = db.cursor(dictionary=True)
         cursor.execute('Select  id, username , email  from accounts')
         user_table = cursor.fetchall()
@@ -182,8 +162,8 @@ def deleteuser(id):
     Controller get the user's id by GET method <int:id>
     Controller will access to database and delete the row of user by using delete_user(id)"""
     if session.get('admin_auth'):
-        delete_data('account', 'id', id)
-        db = get_db()
+        dbManager.delete_data('account', 'id', id)
+        db = dbManager.get_db()
         cursor = db.cursor(dictionary=True)
         cursor.execute('Select id, username, email from accounts')
         user_table = cursor.fetchall()

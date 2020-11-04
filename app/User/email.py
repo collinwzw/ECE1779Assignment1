@@ -28,4 +28,4 @@ def send_password_reset_email(email, new_password):
     send_email('[No reply] Your New Password',
                sender='ece1779group@gmail.com',
                recipients=[email],
-               text_body=render_template('email.txt', newpsw=new_password))
+               text_body=render_template('userManager/email.txt', newpsw=new_password))

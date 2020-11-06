@@ -27,16 +27,20 @@ def login():
         if form.validate_on_submit():
             username = form.username.data
             password = form.password.data
-            loginsystem = LoginSystem.getInstance()
-            user = loginsystem.verifyLogin(username,password)
-            if user:
-                LoginSystem.login_user(user)
-                flash('Login successfully!')
-                return redirect(url_for('home'))
-            else:
-                flash('Invalid username or password')
-                return redirect(url_for('login'))
-
+            account = dbManager.search_data("accounts","username", username)
+            if account:
+                if check_password_hash(str(account['password_hash']), password):
+                    session['loggedin'] = True
+                    session['id'] = account['id']
+                    session['username'] = account['username']
+                    session['admin_auth'] = bool(account['admin_auth'])
+                    flash('Login successfully!')
+                    return redirect(url_for('home'))
+                else:
+                    flash('Invalid username or password')
+                    return redirect(url_for('login'))
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
         else:
             return redirect(url_for('login'))
 
@@ -70,7 +74,7 @@ def reset_password():
         else:
             flash('This email address is not registered')
             return redirect('reset_password')
-    return render_template('resetpassword.html', form=form)
+    return render_template('userManager/resetpassword.html', form=form)
 
 
 @app.route('/change_my_password', methods=['POST', 'GET'])
@@ -89,7 +93,7 @@ def change_my_password():
         account=dbManager.search_data("any","account","username",username)
         if account:
             if check_password_hash(str(account['password_hash']), old_password):
-                dbManager.update_data("any","accounts","password_hash",new_password_hash,"username",username,"error.html")
+                dbManager.update_data("accounts","password_hash",new_password_hash,"username",username,"error.html")
                 flash('Your password has been changed')
                 return redirect(url_for('login'))
             else:
@@ -99,7 +103,7 @@ def change_my_password():
             flash('Invalid username or password')
             return redirect(url_for('change_my_password'))
     else:
-        return render_template('changemypassword.html', form=form)
+        return render_template('userManager/changemypassword.html', form=form)
 
 
 @app.route('/admin/adduser', methods=['GET', 'POST'])
@@ -131,12 +135,10 @@ def add_new_user():
                 cursor.execute("commit")
                 flash("You have add a new user successfully")
                 return redirect(url_for('add_new_user'))
-
     else:
         flash('You are not an admin')
         return redirect(url_for('login'))
-
-    return render_template('adduser.html', title='Add New User', form=form)
+    return render_template('userManager/adduser.html', title='Add New User', form=form)
 
 
 @app.route('/admin/usermanager', methods=['GET', 'POST'])
@@ -150,7 +152,7 @@ def userManager():
         cursor = db.cursor(dictionary=True)
         cursor.execute('Select  id, username , email  from accounts')
         user_table = cursor.fetchall()
-        return render_template('usermanager.html', usertable=user_table)
+        return render_template('userManager/usermanager.html', usertable=user_table)
     else:
         flash('You are not an admin')
         return redirect(url_for('home'))
@@ -167,4 +169,4 @@ def deleteuser(id):
         cursor = db.cursor(dictionary=True)
         cursor.execute('Select id, username, email from accounts')
         user_table = cursor.fetchall()
-        return render_template('usermanager.html', usertable=user_table)
+        return render_template('userManager/usermanager.html', usertable=user_table)

@@ -3,34 +3,33 @@ from app.database.db_config import db_config
 import mysql.connector
 from app.database import db_config
 import sys
+from app.database.db_config import db_config
 
 
 class dbManager:
-    def __init__(self):
-        self.dbconfig = db_config.db_config
 
     @staticmethod
-    def get_db(self):
+    def get_db():
         #access to database
         db = getattr(g, '_database', None)
         if db is None:
-            db = g._database = self.connect_to_database()
+            db = g._database = dbManager.connect_to_database()
         return db
 
     @staticmethod
-    def teardown_db(self,exception):
+    def teardown_db(exception):
         #close the database
         db = getattr(g, '_database', None)
         if db is not None:
             db.close()
 
     @staticmethod
-    def connect_to_database(self):
+    def connect_to_database():
         #Connect database
-        return mysql.connector.connect(user=self.dbconfig['user'],
-                                       password=self.dbconfig['password'],
-                                       host=self.dbconfig['host'],
-                                       database=self.dbconfig['database'])
+        return mysql.connector.connect(user=db_config['user'],
+                                       password=db_config['password'],
+                                       host=db_config['host'],
+                                       database=db_config['database'])
 
 
 
@@ -69,9 +68,9 @@ class dbManager:
 
 
     @staticmethod
-    def search_data(self, table, target_key, condition, singleResult = True ):
+    def search_data(table, target_key, condition, singleResult = True ):
         '''method search data in SQL with target condition'''
-        db = self.get_db()
+        db = dbManager.get_db()
         cursor = db.cursor(dictionary=True)
         query ="SELECT * FROM " + table + " WHERE " + target_key + " = %s "
         cursor.execute(query, (condition,))
@@ -84,16 +83,16 @@ class dbManager:
     @staticmethod
     def insert_data(self,table, row1, row2, row3, row4, value1, value2, value3, value4):
         '''method insert data into table of SQL'''
-        db = self.get_db()
+        db = dbManager.get_db()
         cursor = db.cursor(dictionary=True)
         query = "Insert into "+table+" (%s, %s, %s, %s) values (%s, %s, %s, %s)"
         cursor.execute(query, (table, row1, row2, row3, row4, value1, value2, value3, value4))
         cursor.execute("commit")
 
     @staticmethod
-    def insert_data_image(self, value1, value2, value3, value4, returnHTML):
+    def insert_data_image(value1, value2, value3, value4, returnHTML):
         '''method insert data into table of SQL'''
-        db = self.get_db()
+        db = dbManager.get_db()
         cursor = db.cursor(dictionary=True)
         try:
             query = "Insert into images  values (%s, %s, %s, %s)"
@@ -102,6 +101,6 @@ class dbManager:
         except:
             e = sys.exc_info()
             db.rollback()
-            self.teardown_db(e)
+            dbManager.teardown_db(e)
             return render_template(returnHTML, message="database error: " + str(e))
 

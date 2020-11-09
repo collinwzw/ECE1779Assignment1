@@ -4,11 +4,10 @@ from app import app
 from flask import render_template, g, request, session, redirect, url_for, send_from_directory, send_file
 from app.database.dbManager import dbManager
 import cv2
-import os, sys
-from werkzeug.utils import secure_filename
-import requests
-from FaceMaskDetection.pytorch_infer import inference
 
+import os, sys, shutil
+from FaceMaskDetection.pytorch_infer import inference
+import os, shutil
 app.config["ALLOWED_IMAGE_EXETENSIONS"] = ["JPEG","JPG","PNG"]
 app.config['MAX_IMAGE_FILESIZE'] = 512*512
 
@@ -97,3 +96,17 @@ class ImageHandler:
             if outputInfor[0] == 0:
                 result = result + 1
         return result
+
+
+@staticmethod
+def deleteAllImages():
+    folder = app.config["IMAGE_PROCESSED"]
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))

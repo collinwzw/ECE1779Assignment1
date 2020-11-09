@@ -8,4 +8,5 @@ sys.path.insert(1, './FaceMaskDetection/utils')
 
 app.config["IMAGE_UPLOADS"]="./app/static/img/uploads"
 app.config["IMAGE_PROCESSED"]="./app/static/img/processed"
+app.config["IMAGE_SEND"]="./static/img/processed"
 app.config["API_IMAGE_UPLOADS"]="./app/static/img/api_upload"

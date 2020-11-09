@@ -7,6 +7,8 @@ from werkzeug.utils import secure_filename
 import requests
 from app.ImageHandler.model import ImageHandler
 from app.database.dbManager import dbManager
+from app.S3FileManager import S3
+
 
 
 @app.route('/sendImages/<filename>/', methods=["GET", "POST"])
@@ -18,7 +20,10 @@ def sendImages(filename):
     :param filename: input filename
     :return: sends the contents of a file to the html
     '''
-    image_path = os.path.join(app.config["IMAGE_PROCESSED"], filename)
+
+    image_path = os.path.join(app.config["IMAGE_SEND"], filename)
+    image_save = os.path.join(app.config["IMAGE_PROCESSED"], filename)
+    S3.downloadFileFromBucket('ece1779images',filename,image_save )
     return send_file(image_path)
 
 @app.route('/imageView')
@@ -62,6 +67,7 @@ def imageUpload():
     If it pass all assertion, the system will store the original file
     :return:
     '''
+    ImageHandler.deleteAllImages()
     if 'loggedin' in session:
         if request.method == "POST":
             if request.files:
@@ -89,7 +95,10 @@ def imageUpload():
                         dbm.insert_data_image(session['id'],finafilename,numberofFaces,numberofMasks,"imageManager/imageUpload.html")
                         processedSavePath = os.path.join(app.config["IMAGE_PROCESSED"], finafilename)
                         cv2.imwrite(processedSavePath, cv2.cvtColor(processedImage, cv2.COLOR_RGB2BGR))
+                        S3.uploadFileFromBucketLocal('ece1779images', processedSavePath,finafilename)
+
                         os.remove(savePath)
+                        #os.remove(processedSavePath)
 
                     return redirect("imageView")
             elif request.form['url'] != "":

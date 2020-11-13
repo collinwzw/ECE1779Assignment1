@@ -10,30 +10,17 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
 
 from FaceMaskDetection.pytorch_infer import inference
+from app.database.dbManager import dbManager
+
+from app.ImageHandler.model import ImageHandler
 
 app.config['MAX_CONTENT_LENGTH'] =  1024 * 1024
 
 
-def connect_to_database():
-    return mysql.connector.connect(user=db_config['user'],
-                                   password=db_config['password'],
-                                   host=db_config['host'],
-                                   database=db_config['database'])
 
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = connect_to_database()
-    return db
-
-
-def teardown_db(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
 
 def getNumberOfFilesInDatabase():
-    db = get_db()
+    db = dbManager.get_db()
     cursor = db.cursor()
     query = '''select count(*) from images'''
     cursor.execute(query)
@@ -61,33 +48,6 @@ def allowedImageFilesize(filesize):
     else:
         return False
 
-def faceMaskDetection(readFilePath):
-    '''
-    This method read the original image uploaded by user and return the processed image with
-    data
-    :param readFilePath:
-    :return: information of # of faces/masks and image itself
-    '''
-
-    img = cv2.imread(readFilePath)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    output_info, image = inference(img, show_result=False, target_shape=(360, 360))
-
-    #cv2.imwrite(saveFilePath, image)
-    return output_info,image
-
-def NumberOfMask(outputList):
-    '''
-    This method read the raw data output from pytorch_infer.py and determine
-    number of faces with masks
-    :param outputList:
-    :return:
-    '''
-    result = 0
-    for outputInfor in outputList:
-        if outputInfor[0] == 0:
-            result = result + 1
-    return result
 
 
 @bp.route('/upload', methods=['GET','POST'])
@@ -101,7 +61,7 @@ def upload():
         # Create variables for easy access
         username = request.form['username']
         password = request.form['password']
-        db = get_db()
+        db = dbManager.get_db()
         cursor = db.cursor(dictionary=True)
         query = "SELECT * FROM accounts WHERE username = %s"
         cursor.execute(query, (username,))
@@ -135,9 +95,9 @@ def upload():
                         filename = secure_filename(image.filename)
                         savePath = os.path.join(app.config["API_IMAGE_UPLOADS"], image.filename)
                         image.save(savePath)
-                        output_info, processedImage = faceMaskDetection(savePath)
+                        output_info, processedImage = ImageHandler.faceMaskDetection(savePath)
                         numberofFaces = len(output_info)
-                        numberofMasks = NumberOfMask(output_info)
+                        numberofMasks = ImageHandler.NumberOfMask(output_info)
                         return jsonify({
                             "success": True,
                             "payload": {

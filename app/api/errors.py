@@ -7,7 +7,7 @@ def error_response(status_code, message=None):
     :param: status_code:http error code, error message:detailed customized error message
     :return:json
     '''
-    payload = {"success": False,"error":{ "code":HTTP_STATUS_CODES.get(status_code, 'Unknown error')}}
+    payload = {"success": False,"error":{ "code":status_code}}
     if message:
         payload['error']['message'] = message
     response = jsonify(payload)

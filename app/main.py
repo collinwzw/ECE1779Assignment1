@@ -1,6 +1,5 @@
 from app import app
 from flask import render_template, request, redirect, url_for, session
-from app.User.model import User
 import app.model as m
 from app.CloudWatch import CloudWatch
 @app.route('/')

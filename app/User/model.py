@@ -4,16 +4,6 @@ from flask import render_template, request, redirect, url_for, session
 from app.database.dbManager import dbManager
 import string, random
 
-class User:
-
-    @staticmethod
-    def getUser(userID):
-        db = dbManager()
-        account = db.search_data('accounts','id' , userID)
-        if account:
-            return account
-        return None
-
 
 class LoginSystem:
     @staticmethod

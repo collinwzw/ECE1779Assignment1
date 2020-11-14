@@ -28,7 +28,7 @@ def login():
         if form.validate_on_submit():
             username = form.username.data
             password = form.password.data
-            account = dbManager.search_data("accounts","username", username)
+            account = dbManager.check_username(username)
             if account:
                 if check_password_hash(str(account['password_hash']), password):
                     session['loggedin'] = True
@@ -65,11 +65,11 @@ def reset_password():
     database = dbManager()
     if form.validate_on_submit():
         user_email = form.email.data
-        mail_exist = database.search_data("any","accounts","email",user_email)
+        mail_exist = database.check_email(user_email)
         if mail_exist:
             new_password = LoginSystem.generate_password()
             new_password_hash = generate_password_hash(new_password)
-            database.update_data("any","accounts", "password_hash", new_password_hash, "email", user_email, "error.html")
+            dbManager.update_password_mail(new_password_hash,user_email)
             flash('Your new password has been sent to your mailbox')
             redirect('login')
             send_password_reset_email(user_email, new_password)
@@ -94,10 +94,10 @@ def change_my_password():
         username = form.username.data
         old_password = form.password.data
         new_password_hash = generate_password_hash(form.password1.data)
-        account=dbManager.search_data("any","account","username",username)
+        account=dbManager.check_username(username)
         if account:
             if check_password_hash(str(account['password_hash']), old_password):
-                dbManager.update_data("accounts","password_hash",new_password_hash,"username",username,"error.html")
+                dbManager.update_password_username(new_password_hash,username)
                 flash('Your password has been changed')
                 return redirect(url_for('login'))
             else:
@@ -124,20 +124,12 @@ def add_new_user():
             password_hash = generate_password_hash(form.password1.data)
             email = form.email.data
             admin_auth = form.admin_auth.data
-            db = dbManager.get_db()
-            cursor = db.cursor(dictionary=True)
-            query = "SELECT * FROM accounts WHERE username = %s or email = %s"
-            cursor.execute(query, (username, email))
-            account = cursor.fetchone()
+            account = dbManager.check_exist(username,email)
             if account:
                 flash('This User name or Email is existing')
                 return redirect(url_for('add_new_user'))
             else:
-                db = dbManager.get_db()
-                cursor = db.cursor(dictionary=True)
-                cursor.execute("Insert into accounts (username, password_hash, email,admin_auth) "
-                               "values (%s, %s, %s, %s)", (username, password_hash, email, admin_auth))
-                cursor.execute("commit")
+                dbManager.add_user(username,password_hash,email,admin_auth)
                 flash("You have add a new user successfully")
                 return redirect(url_for('add_new_user'))
     else:
@@ -154,10 +146,7 @@ def userManager():
     """
     CloudWatch.putHttpRequestRateByID()
     if session.get('admin_auth'):
-        db = dbManager.get_db()
-        cursor = db.cursor(dictionary=True)
-        cursor.execute('Select  id, username , email  from accounts')
-        user_table = cursor.fetchall()
+        user_table = dbManager.show_account()
         return render_template('userManager/usermanager.html', usertable=user_table)
     else:
         flash('You are not an admin')
@@ -171,9 +160,6 @@ def deleteuser(id):
     Controller will access to database and delete the row of user by using delete_user(id)"""
     CloudWatch.putHttpRequestRateByID()
     if session.get('admin_auth'):
-        dbManager.delete_data('account', 'id', id)
-        db = dbManager.get_db()
-        cursor = db.cursor(dictionary=True)
-        cursor.execute('Select id, username, email from accounts')
-        user_table = cursor.fetchall()
+        dbManager.delete_user(id)
+        user_table = dbManager.show_account()
         return render_template('userManager/usermanager.html', usertable=user_table)

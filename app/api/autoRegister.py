@@ -24,6 +24,7 @@ def teardown_db(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
+from app.database.dbManager import dbManager
 
 
 @bp.route('/register', methods=['GET','POST'])
@@ -43,7 +44,7 @@ def register():
         username = request.form['username']
         password = request.form['password']
         password_hash = generate_password_hash(password)
-        cnx = get_db()
+        cnx = dbManager.get_db()
         cursor = cnx.cursor()
         query = '''SELECT * FROM accounts WHERE username = %s '''
         cursor.execute(query,(username, ))

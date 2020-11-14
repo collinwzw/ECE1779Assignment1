@@ -104,3 +104,20 @@ class dbManager:
             dbManager.teardown_db(e)
             return render_template(returnHTML, message="database error: " + str(e))
 
+    @staticmethod
+    def insert_date_time(instanceID, datetime, returnHTML):
+        '''method insert data into table of SQL'''
+        db = dbManager.get_db()
+        cursor = db.cursor(dictionary=True)
+        try:
+            #query = "Insert into requests_table  values (%s, %s)"
+            #cursor.execute(query, ( instanceID, datetime,))
+            #cursor.execute("commit")
+            query = "select * from requests_table"
+            cursor.execute(query)
+            print(cursor)
+        except:
+            e = sys.exc_info()
+            db.rollback()
+            dbManager.teardown_db(e)
+            return render_template(returnHTML, message="database error: " + str(e))

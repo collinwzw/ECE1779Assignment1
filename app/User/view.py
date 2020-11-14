@@ -6,7 +6,7 @@ from app.User.form import LoginForm, ChangePassword, ResetPassword, AddUserForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.User.model import LoginSystem
 from app.User.email import send_password_reset_email
-
+from app.CloudWatch import CloudWatch
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -18,6 +18,7 @@ def login():
     If login success, user id, username, admin_auth will be save in session
     account: assert if username is in database.
     """
+    CloudWatch.putHttpRequestRateByID()
     form = LoginForm()
     if request.method == "GET":
         return render_template('userManager/login.html', title='Sign In', form=form)
@@ -47,6 +48,7 @@ def login():
 
 @app.route('/logout')
 def logout():
+    CloudWatch.putHttpRequestRateByID()
     LoginSystem.logout_user()
     """Controller pop the login status and user information in session, then redirect to index page"""
     return redirect(url_for('index'))
@@ -58,6 +60,7 @@ def reset_password():
     Controller will validate the email in database and generate a new password 10-lenght-random string.
     Then it will try to send a email with new password to user's mailbox by gmail.
     Email template is email.txt"""
+    CloudWatch.putHttpRequestRateByID()
     form = ResetPassword()
     database = dbManager()
     if form.validate_on_submit():
@@ -83,6 +86,7 @@ def change_my_password():
     It will generate the new password hash and write into the database.
     If username not exist, or wrong password, controller will not allow user change password.
      """
+    CloudWatch.putHttpRequestRateByID()
     form = ChangePassword()
     if request.method == 'GET':
         return render_template('changemypassword.html', form=form)
@@ -112,6 +116,7 @@ def add_new_user():
     It will assert if user is admin by admin_auth. if it is normal user, it will redirect to login page
     When admin add new user, if same username or email in database, it will refuse to create new user
     Admin also allow to create another admin by input admin_auth True"""
+    CloudWatch.putHttpRequestRateByID()
     if session.get('admin_auth'):
         form = AddUserForm()
         if form.validate_on_submit():
@@ -147,6 +152,7 @@ def userManager():
     Controller will go to database and show all users by user_table:(id ,username ,email)
     Botton on the html will allow admin to delete users.
     """
+    CloudWatch.putHttpRequestRateByID()
     if session.get('admin_auth'):
         db = dbManager.get_db()
         cursor = db.cursor(dictionary=True)
@@ -163,6 +169,7 @@ def deleteuser(id):
     """Controller allows admin to delect users
     Controller get the user's id by GET method <int:id>
     Controller will access to database and delete the row of user by using delete_user(id)"""
+    CloudWatch.putHttpRequestRateByID()
     if session.get('admin_auth'):
         dbManager.delete_data('account', 'id', id)
         db = dbManager.get_db()

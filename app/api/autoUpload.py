@@ -8,7 +8,7 @@ import cv2
 import os
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
-
+from app.CloudWatch import CloudWatch
 from FaceMaskDetection.pytorch_infer import inference
 
 app.config['MAX_CONTENT_LENGTH'] =  1024 * 1024
@@ -96,6 +96,8 @@ def upload():
     controller that allow user who log in to upload image.
     :return:json responses
     '''
+    CloudWatch.putHttpRequestRateByID()
+
     msg = ''
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         # Create variables for easy access

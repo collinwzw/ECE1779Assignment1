@@ -5,7 +5,7 @@ from app.database import db_config
 import re
 from app.api.errors import error_response as api_error_response
 from werkzeug.security import generate_password_hash
-
+from app.CloudWatch import CloudWatch
 
 def connect_to_database():
     return mysql.connector.connect(user=db_config['user'],
@@ -32,6 +32,9 @@ def register():
     controller that allow register.
     :return:json responds
     '''
+
+    CloudWatch.putHttpRequestRateByID()
+
     if request.method == 'GET':
         return render_template('api/autoRegister.html')
 

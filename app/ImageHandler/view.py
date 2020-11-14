@@ -8,6 +8,7 @@ import requests
 from app.ImageHandler.model import ImageHandler
 from app.database.dbManager import dbManager
 from app.S3FileManager import S3
+from app.CloudWatch import CloudWatch
 
 
 
@@ -36,6 +37,7 @@ def imageView():
     :return:
     '''
     # Check if user is loggedin
+    CloudWatch.putHttpRequestRateByID()
     if 'loggedin' in session:
         # We need all the account info for the user so we can display it on the profile page
         dbm = dbManager();
@@ -67,6 +69,7 @@ def imageUpload():
     If it pass all assertion, the system will store the original file
     :return:
     '''
+    CloudWatch.putHttpRequestRateByID()
     ImageHandler.deleteAllImages()
     if 'loggedin' in session:
         if request.method == "POST":

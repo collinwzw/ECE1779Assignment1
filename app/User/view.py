@@ -89,7 +89,7 @@ def change_my_password():
     CloudWatch.putHttpRequestRateByID()
     form = ChangePassword()
     if request.method == 'GET':
-        return render_template('changemypassword.html', form=form)
+        return render_template('userManager/changemypassword.html', form=form)
     if request.method == 'POST' and form.validate_on_submit():
         username = form.username.data
         old_password = form.password.data
